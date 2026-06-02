@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import type { UIEvent, CSSProperties } from 'react';
 
-
 interface VirtualListProps {
   height: number;
   width: number | string;
@@ -9,6 +8,7 @@ interface VirtualListProps {
   itemSize: number;
   children: (props: { index: number; style: CSSProperties }) => React.ReactNode;
   scrollToIndex?: number;
+  scrollTrigger?: any;
 }
 
 export const VirtualList = ({
@@ -18,6 +18,7 @@ export const VirtualList = ({
   itemSize,
   children,
   scrollToIndex,
+  scrollTrigger,
 }: VirtualListProps) => {
   const [scrollTop, setScrollTop] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -28,7 +29,7 @@ export const VirtualList = ({
       const targetScroll = scrollToIndex * itemSize - height / 2 + itemSize / 2;
       containerRef.current.scrollTop = Math.max(0, targetScroll);
     }
-  }, [scrollToIndex, height, itemSize]);
+  }, [scrollTrigger]);
 
   const handleScroll = (e: UIEvent<HTMLDivElement>) => {
     setScrollTop(e.currentTarget.scrollTop);

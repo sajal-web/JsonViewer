@@ -9,6 +9,11 @@ import {
   FileCode2,
   Calendar,
   FileDown,
+  Info,
+  Mail,
+  Scale,
+  Shield,
+  FileText,
 } from 'lucide-react';
 import { useJsonStore } from '../store/useJsonStore';
 import { SHORTCUTS } from '../constants';
@@ -22,6 +27,8 @@ export const Sidebar = () => {
     rawInput,
     parsedJson,
     setRawInput,
+    activePage,
+    setActivePage,
   } = useJsonStore();
 
   // Calculate live JSON statistics
@@ -176,6 +183,63 @@ export const Sidebar = () => {
                       </div>
                     ))
                   )}
+                </div>
+              </div>
+
+              {/* Pages & Docs Navigation */}
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 text-slate-400 font-semibold text-xs uppercase tracking-wider">
+                  <FileText className="w-4 h-4 text-sky-400" />
+                  <span>Platform Info</span>
+                </div>
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  <button
+                    onClick={() => setActivePage('about')}
+                    className={`flex items-center gap-2 p-2.5 rounded-lg border text-left cursor-pointer transition-all ${
+                      activePage === 'about'
+                        ? 'bg-blue-500/10 border-blue-500/35 text-blue-400 font-semibold'
+                        : 'bg-slate-900/40 border-slate-900 hover:border-slate-800 text-slate-400 hover:text-slate-200'
+                    }`}
+                  >
+                    <Info className="w-3.5 h-3.5 flex-shrink-0" />
+                    <span>About</span>
+                  </button>
+
+                  <button
+                    onClick={() => setActivePage('contact')}
+                    className={`flex items-center gap-2 p-2.5 rounded-lg border text-left cursor-pointer transition-all ${
+                      activePage === 'contact'
+                        ? 'bg-blue-500/10 border-blue-500/35 text-blue-400 font-semibold'
+                        : 'bg-slate-900/40 border-slate-900 hover:border-slate-800 text-slate-400 hover:text-slate-200'
+                    }`}
+                  >
+                    <Mail className="w-3.5 h-3.5 flex-shrink-0" />
+                    <span>Contact</span>
+                  </button>
+
+                  <button
+                    onClick={() => setActivePage('terms')}
+                    className={`flex items-center gap-2 p-2.5 rounded-lg border text-left cursor-pointer transition-all ${
+                      activePage === 'terms'
+                        ? 'bg-blue-500/10 border-blue-500/35 text-blue-400 font-semibold'
+                        : 'bg-slate-900/40 border-slate-900 hover:border-slate-800 text-slate-400 hover:text-slate-200'
+                    }`}
+                  >
+                    <Scale className="w-3.5 h-3.5 flex-shrink-0" />
+                    <span>Terms</span>
+                  </button>
+
+                  <button
+                    onClick={() => setActivePage('privacy')}
+                    className={`flex items-center gap-2 p-2.5 rounded-lg border text-left cursor-pointer transition-all ${
+                      activePage === 'privacy'
+                        ? 'bg-blue-500/10 border-blue-500/35 text-blue-400 font-semibold'
+                        : 'bg-slate-900/40 border-slate-900 hover:border-slate-800 text-slate-400 hover:text-slate-200'
+                    }`}
+                  >
+                    <Shield className="w-3.5 h-3.5 flex-shrink-0" />
+                    <span>Privacy</span>
+                  </button>
                 </div>
               </div>
 

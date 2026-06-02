@@ -102,6 +102,7 @@ export const JsonTreeView = () => {
             itemCount={visibleNodes.length}
             itemSize={28}
             scrollToIndex={activeSearchNodeIndex}
+            scrollTrigger={activeMatchId}
           >
             {({ index, style }: { index: number; style: any }) => {
               const node = visibleNodes[index];

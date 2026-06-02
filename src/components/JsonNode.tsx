@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, memo } from 'react';
 import type { CSSProperties, MouseEvent } from 'react';
 import { ChevronRight, ChevronDown, Copy, Link, Check } from 'lucide-react';
 import type { FlatNode } from '../types';
@@ -14,7 +14,7 @@ interface JsonNodeProps {
   onCopyValue: (value: any) => void;
 }
 
-export const JsonNode = ({
+export const JsonNode = memo(({
   node,
   style,
   isSearched,
@@ -156,6 +156,21 @@ export const JsonNode = ({
       </div>
     </div>
   );
-};
+}, (prevProps, nextProps) => {
+  return (
+    prevProps.node.id === nextProps.node.id &&
+    prevProps.node.key === nextProps.node.key &&
+    prevProps.node.value === nextProps.node.value &&
+    prevProps.node.isExpanded === nextProps.node.isExpanded &&
+    prevProps.node.depth === nextProps.node.depth &&
+    prevProps.node.size === nextProps.node.size &&
+    prevProps.node.hasChildren === nextProps.node.hasChildren &&
+    prevProps.isSearched === nextProps.isSearched &&
+    prevProps.isHighlighted === nextProps.isHighlighted &&
+    prevProps.style?.top === nextProps.style?.top &&
+    prevProps.style?.height === nextProps.style?.height
+  );
+});
 
 export default JsonNode;
+

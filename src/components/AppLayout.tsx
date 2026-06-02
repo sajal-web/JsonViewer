@@ -8,6 +8,10 @@ import JsonTreeView from './JsonTreeView';
 import SplitPane from './SplitPane';
 import ErrorConsole from './ErrorConsole';
 import useKeyboardShortcuts from '../hooks/useKeyboardShortcuts';
+import AboutPage from '../pages/AboutPage';
+import ContactPage from '../pages/ContactPage';
+import TermsPage from '../pages/TermsPage';
+import PrivacyPage from '../pages/PrivacyPage';
 
 export const AppLayout: React.FC = () => {
   const {
@@ -17,6 +21,8 @@ export const AppLayout: React.FC = () => {
     toggleSidebar,
     rawInput,
     formatJson,
+    activePage,
+    setActivePage,
   } = useJsonStore();
 
 
@@ -48,6 +54,21 @@ export const AppLayout: React.FC = () => {
     setSplitRatio(ratio);
   };
 
+  const renderPage = () => {
+    switch (activePage) {
+      case 'about':
+        return <AboutPage />;
+      case 'contact':
+        return <ContactPage />;
+      case 'terms':
+        return <TermsPage />;
+      case 'privacy':
+        return <PrivacyPage />;
+      default:
+        return null;
+    }
+  };
+
   return (
     <div className="w-screen h-screen flex flex-col bg-slate-950 dark:bg-slate-950 light:bg-slate-50 text-slate-100 overflow-hidden relative">
       {/* Drawer Sidebar */}
@@ -66,8 +87,11 @@ export const AppLayout: React.FC = () => {
           </button>
 
           {/* Logo Brand */}
-          <div className="flex items-center gap-2">
-            <div className="w-5 h-5 rounded-md bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-[10px] font-bold text-white shadow-md shadow-blue-500/25">
+          <div
+            onClick={() => setActivePage('editor')}
+            className="flex items-center gap-2 cursor-pointer group"
+          >
+            <div className="w-5 h-5 rounded-md bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-[10px] font-bold text-white shadow-md shadow-blue-500/25 group-hover:scale-105 transition-all">
               {"{}"}
             </div>
             <span className="font-bold text-slate-100 text-sm tracking-tight flex items-center gap-1.5">
@@ -105,24 +129,30 @@ export const AppLayout: React.FC = () => {
 
       {/* Primary Editor Workspace Container */}
       <main className="flex-1 w-full flex flex-col overflow-hidden relative">
-        {/* Row 2: Developer Tooling Actions */}
-        <Toolbar />
+        {activePage === 'editor' ? (
+          <>
+            {/* Row 2: Developer Tooling Actions */}
+            <Toolbar />
 
-        {/* Row 3: Live search bar */}
-        <SearchBar />
+            {/* Row 3: Live search bar */}
+            <SearchBar />
 
-        {/* Row 4: Resizable Splitted Editor/Tree Panel */}
-        <div className="flex-1 w-full overflow-hidden flex">
-          <SplitPane
-            leftPanel={<MonacoEditorPanel />}
-            rightPanel={<JsonTreeView />}
-            ratio={splitRatio}
-            onChange={handleSplitRatioChange}
-          />
-        </div>
+            {/* Row 4: Resizable Splitted Editor/Tree Panel */}
+            <div className="flex-1 w-full overflow-hidden flex">
+              <SplitPane
+                leftPanel={<MonacoEditorPanel />}
+                rightPanel={<JsonTreeView />}
+                ratio={splitRatio}
+                onChange={handleSplitRatioChange}
+              />
+            </div>
 
-        {/* Bottom Console Panel */}
-        <ErrorConsole />
+            {/* Bottom Console Panel */}
+            <ErrorConsole />
+          </>
+        ) : (
+          renderPage()
+        )}
       </main>
     </div>
   );

@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { ValidationError, AppTheme, HistoryItem, SearchMatch } from '../types';
+import type { ValidationError, AppTheme, HistoryItem, SearchMatch, AppPage } from '../types';
 import { parseJsonWithErrorInfo, parseYamlWithErrorInfo, jsonToYaml, yamlToJson } from '../utils/jsonParser';
 
 import { getPathsMatchingSearch } from '../utils/treeUtils';
@@ -19,6 +19,7 @@ interface JsonStore {
   splitRatio: number;
   history: HistoryItem[];
   isParsing: boolean;
+  activePage: AppPage;
 
   setRawInput: (text: string, bypassWorker?: boolean) => void;
   setTheme: (theme: AppTheme) => void;
@@ -37,6 +38,7 @@ interface JsonStore {
   prevSearchMatch: () => void;
   addHistoryItem: (label: string, data: string) => void;
   clearHistory: () => void;
+  setActivePage: (page: AppPage) => void;
 }
 
 // Instantiate worker with fallback
@@ -105,6 +107,7 @@ export const useJsonStore = create<JsonStore>((set, get) => {
     splitRatio: 0.45,
     history: [],
     isParsing: false,
+    activePage: 'editor',
 
     setRawInput: (text: string, bypassWorker = false) => {
       set({ rawInput: text });
@@ -424,6 +427,9 @@ export const useJsonStore = create<JsonStore>((set, get) => {
 
     clearHistory: () => {
       set({ history: [] });
+    },
+    setActivePage: (page) => {
+      set({ activePage: page, isSidebarOpen: false });
     },
   };
 });
