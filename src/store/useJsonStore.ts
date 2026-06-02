@@ -32,7 +32,6 @@ interface JsonStore {
   formatJson: () => void;
   minifyJson: () => void;
   clearAll: () => void;
-  loadExample: () => void;
   setSearchQuery: (query: string) => void;
   nextSearchMatch: () => void;
   prevSearchMatch: () => void;
@@ -63,7 +62,13 @@ export const useJsonStore = create<JsonStore>((set, get) => {
           if (data) {
             // Expand first level by default
             if (typeof data === 'object') {
-              Object.keys(data).forEach(k => expanded.add(`$.${k}`));
+              if (Array.isArray(data)) {
+                for (let i = 0; i < Math.min(data.length, 20); i++) {
+                  expanded.add(`$[${i}]`);
+                }
+              } else {
+                Object.keys(data).forEach(k => expanded.add(`$.${k}`));
+              }
             }
           }
           set({
@@ -126,16 +131,47 @@ export const useJsonStore = create<JsonStore>((set, get) => {
             : parseYamlWithErrorInfo(text);
 
         if (parseResult.success) {
-          const expanded = new Set<string>(get().expandedPaths);
-          if (expanded.size <= 1) {
-            expanded.add('$');
-            const data = parseResult.data;
-            if (data && typeof data === 'object') {
-              Object.keys(data).forEach(k => expanded.add(`$.${k}`));
+          const oldData = get().parsedJson;
+          const newData = parseResult.data;
+          let expanded = new Set<string>(get().expandedPaths);
+
+          const isOldObj = oldData && typeof oldData === 'object';
+          const isNewObj = newData && typeof newData === 'object';
+
+          // Determine if we should reset expanded paths (e.g. if root keys or structure changed,
+          // or if the previous expansion size was small/empty)
+          let shouldResetExpansion = false;
+
+          if (!isOldObj || !isNewObj || Array.isArray(oldData) !== Array.isArray(newData)) {
+            shouldResetExpansion = true;
+          } else if (isNewObj && !Array.isArray(newData)) {
+            const oldKeys = Object.keys(oldData);
+            const newKeys = Object.keys(newData);
+            const keysChanged = oldKeys.length !== newKeys.length || oldKeys.some((k, i) => k !== newKeys[i]);
+            if (keysChanged) {
+              shouldResetExpansion = true;
+            }
+          } else if (isNewObj && Array.isArray(newData)) {
+            if (oldData.length !== newData.length) {
+              shouldResetExpansion = true;
             }
           }
+
+          if (shouldResetExpansion || expanded.size <= 1) {
+            expanded = new Set<string>(['$']);
+            if (isNewObj) {
+              if (Array.isArray(newData)) {
+                for (let i = 0; i < Math.min(newData.length, 20); i++) {
+                  expanded.add(`$[${i}]`);
+                }
+              } else {
+                Object.keys(newData).forEach(k => expanded.add(`$.${k}`));
+              }
+            }
+          }
+
           set({
-            parsedJson: parseResult.data,
+            parsedJson: newData,
             validationError: null,
             expandedPaths: expanded,
           });
@@ -328,19 +364,7 @@ export const useJsonStore = create<JsonStore>((set, get) => {
       });
     },
 
-    loadExample: () => {
-      const mockStr = JSON.stringify(DEFAULT_JSON_MOCK, null, 2);
-      set({
-        rawInput: mockStr,
-        parsedJson: DEFAULT_JSON_MOCK,
-        validationError: null,
-        activeMode: 'json',
-        expandedPaths: new Set<string>(['$', '$.performance', '$.settings', '$.metadata']),
-        searchQuery: '',
-        searchResults: [],
-        searchIndex: -1,
-      });
-    },
+
 
     setSearchQuery: (query) => {
       set({ searchQuery: query });

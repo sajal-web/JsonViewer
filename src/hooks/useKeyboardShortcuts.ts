@@ -5,7 +5,6 @@ interface ShortcutOptions {
   onSearch?: () => void;
   onFormat?: () => void;
   onUpload?: () => void;
-  onLoadMock?: () => void;
 }
 
 export function useKeyboardShortcuts({
@@ -13,7 +12,6 @@ export function useKeyboardShortcuts({
   onSearch,
   onFormat,
   onUpload,
-  onLoadMock,
 }: ShortcutOptions) {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -51,20 +49,14 @@ export function useKeyboardShortcuts({
         }
       }
 
-      // Load mock: Cmd/Ctrl + D
-      if (isCmdOrCtrl && e.key.toLowerCase() === 'd') {
-        if (onLoadMock) {
-          e.preventDefault();
-          onLoadMock();
-        }
-      }
+
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [onSave, onSearch, onFormat, onUpload, onLoadMock]);
+  }, [onSave, onSearch, onFormat, onUpload]);
 }
 
 export default useKeyboardShortcuts;

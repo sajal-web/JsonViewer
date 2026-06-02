@@ -7,7 +7,6 @@ import {
   Trash2,
   ChevronsDown,
   ChevronsUp,
-  Sparkles,
   AlignLeft,
   Minimize2,
 } from 'lucide-react';
@@ -24,7 +23,6 @@ export const Toolbar = () => {
     formatJson,
     minifyJson,
     clearAll,
-    loadExample,
     expandAll,
     collapseAll,
   } = useJsonStore();
@@ -143,17 +141,7 @@ export const Toolbar = () => {
           <span>Download</span>
         </button>
 
-        <span className="w-px h-5 bg-slate-800 mx-1" />
 
-        <button
-          onClick={loadExample}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 hover:border-blue-500/30 text-blue-400 hover:text-blue-300 transition-all cursor-pointer focus:outline-none"
-          title="Load default JSON mockup"
-          id="load-mock-btn"
-        >
-          <Sparkles className="w-3.5 h-3.5" />
-          <span>Load Mock</span>
-        </button>
       </div>
 
       {/* Editor & Tree Operations Group */}

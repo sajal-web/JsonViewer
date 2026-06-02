@@ -1,5 +1,5 @@
 export const DEFAULT_JSON_MOCK = {
-  "appName": "JSON Viewer Pro",
+  "appName": "JSON Viewer",
   "version": "1.0.0",
   "status": "active",
   "features": [
@@ -58,6 +58,5 @@ export const SHORTCUTS = [
   { keys: "Ctrl + F / Cmd + F", action: "Search inside JSON tree" },
   { keys: "Ctrl + Shift + F / Cmd + Shift + F", action: "Format JSON / YAML" },
   { keys: "Ctrl + O / Cmd + O", action: "Upload document file" },
-  { keys: "Ctrl + D / Cmd + D", action: "Load default mock dataset" },
   { keys: "Tab", action: "Indent editor contents" }
 ];
