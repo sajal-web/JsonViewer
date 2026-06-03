@@ -13,6 +13,7 @@ import ContactPage from '../pages/ContactPage';
 import TermsPage from '../pages/TermsPage';
 import PrivacyPage from '../pages/PrivacyPage';
 import ParticleOverlay from './ParticleOverlay';
+import CursorTrail from './CursorTrail';
 
 export const AppLayout: React.FC = () => {
   const {
@@ -158,6 +159,9 @@ export const AppLayout: React.FC = () => {
       
       {/* Satisfying developer particle Canvas overlay */}
       <ParticleOverlay />
+
+      {/* Cursor trail animation */}
+      <CursorTrail />
     </div>
   );
 };

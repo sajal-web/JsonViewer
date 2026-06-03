@@ -22,14 +22,18 @@ export const ParticleOverlay: React.FC = () => {
   const animationFrameIdRef = useRef<number | null>(null);
 
   const colors = [
-    '#3b82f6', // Monaco keywords / blue
-    '#34d399', // JSON strings / emerald
-    '#f59e0b', // Search highlight / amber
-    '#fb7185', // JSON numbers / rose
-    '#a78bfa', // JSON booleans / violet
+    '#3b82f6', // blue
+    '#06b6d4', // cyan
+    '#34d399', // emerald
+    '#f59e0b', // amber
+    '#fb7185', // rose
+    '#a78bfa', // violet
+    '#ec4899', // pink
+    '#10b981', // green
+    '#ef4444', // red
   ];
   
-  const characters = ['{', '}', '[', ']', ':', ',', '"', 'JSON', 'YAML', 'JS'];
+  const characters = ['{', '}', '[', ']', ':', ',', '"', 'JSON', 'YAML', 'JS', '✨', '⚡', '💎', '★'];
 
   // Handle canvas resize
   useEffect(() => {
@@ -76,13 +80,24 @@ export const ParticleOverlay: React.FC = () => {
       ctx.fillStyle = p.color;
       ctx.font = `bold ${p.size}px monospace`;
       
-      // Apply shadow glow for a satisfying neon look
-      ctx.shadowBlur = 8;
+      // Apply enhanced glow and shadow for neon look
+      ctx.shadowBlur = 16;
       ctx.shadowColor = p.color;
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 0;
 
       ctx.translate(p.x, p.y);
       ctx.rotate(p.rotation);
-      ctx.fillText(p.char, -ctx.measureText(p.char).width / 2, p.size / 2);
+      
+      // Draw text with glow effect
+      const textWidth = ctx.measureText(p.char).width;
+      ctx.fillText(p.char, -textWidth / 2, p.size / 2);
+      
+      // Add secondary glow layer
+      ctx.globalAlpha = p.alpha * 0.5;
+      ctx.shadowBlur = 24;
+      ctx.fillText(p.char, -textWidth / 2, p.size / 2);
+      
       ctx.restore();
     }
 
@@ -99,23 +114,23 @@ export const ParticleOverlay: React.FC = () => {
     if (!burstTrigger) return;
     const { x, y } = burstTrigger;
 
-    // Create 20 to 25 particles
-    const particleCount = 20 + Math.floor(Math.random() * 8);
+    // Create more particles for a more impressive effect
+    const particleCount = 30 + Math.floor(Math.random() * 20);
     for (let i = 0; i < particleCount; i++) {
       const angle = Math.random() * Math.PI * 2;
-      const speed = 2 + Math.random() * 6;
+      const speed = 2 + Math.random() * 8;
       particlesRef.current.push({
         x,
         y,
         vx: Math.cos(angle) * speed,
-        vy: Math.sin(angle) * speed - 2.5, // Emphasize upward momentum
+        vy: Math.sin(angle) * speed - 3, // Emphasize upward momentum
         char: characters[Math.floor(Math.random() * characters.length)],
         color: colors[Math.floor(Math.random() * colors.length)],
-        size: 10 + Math.floor(Math.random() * 12),
+        size: 12 + Math.floor(Math.random() * 14),
         alpha: 1.0,
         rotation: Math.random() * Math.PI * 2,
-        rotationSpeed: (Math.random() - 0.5) * 0.15,
-        decay: 0.015 + Math.random() * 0.015,
+        rotationSpeed: (Math.random() - 0.5) * 0.2,
+        decay: 0.01 + Math.random() * 0.015,
       });
     }
 

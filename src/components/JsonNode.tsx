@@ -84,9 +84,9 @@ export const JsonNode = memo(({
       style={style}
       onClick={() => node.hasChildren && onToggle(node.id)}
       className={cn(
-        "group flex items-center h-[28px] px-2 py-0.5 select-none transition-all cursor-default border-l-2 border-transparent text-xs",
-        node.hasChildren && "cursor-pointer hover:bg-slate-900/60 dark:hover:bg-slate-900/60 light:hover:bg-slate-100",
-        !node.hasChildren && "hover:bg-slate-900/40 dark:hover:bg-slate-900/40 light:hover:bg-slate-50",
+        "group json-node-hover flex items-center h-[28px] px-2 py-0.5 select-none transition-all cursor-default border-l-2 border-transparent text-xs",
+        node.hasChildren && "cursor-pointer hover:bg-slate-800/80 dark:hover:bg-slate-800/80 light:hover:bg-slate-100",
+        !node.hasChildren && "hover:bg-slate-900/60 dark:hover:bg-slate-900/60 light:hover:bg-slate-50",
         isSearched && "bg-amber-500/10 border-l-amber-500",
         isHighlighted && "bg-amber-500/25 border-l-amber-500 font-semibold"
       )}
@@ -125,7 +125,7 @@ export const JsonNode = memo(({
       </div>
 
       {/* Hover Action Controls */}
-      <div className="opacity-0 group-hover:opacity-100 flex items-center gap-1.5 flex-shrink-0 bg-slate-900 dark:bg-slate-900 light:bg-slate-100 px-2 py-0.5 rounded shadow-sm transition-opacity border border-slate-800">
+      <div className="json-node-controls opacity-0 group-hover:opacity-100 flex items-center gap-1.5 flex-shrink-0 bg-slate-900/90 dark:bg-slate-900/90 light:bg-slate-100 px-2 py-0.5 rounded shadow-sm border border-slate-800 hover:bg-slate-800/90">
         {/* Copy Path */}
         <button
           onClick={handleCopyPath}
