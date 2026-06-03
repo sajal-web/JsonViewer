@@ -10,8 +10,6 @@ export const JsonTreeView = () => {
     parsedJson,
     expandedPaths,
     togglePath,
-    searchResults,
-    searchIndex,
   } = useJsonStore();
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -37,16 +35,6 @@ export const JsonTreeView = () => {
     return flattenJson(parsedJson, expandedPaths);
   }, [parsedJson, expandedPaths]);
 
-  // Compute active search index inside visibleNodes list
-  const activeSearchNodeIndex = useMemo(() => {
-    if (searchIndex >= 0 && searchResults[searchIndex]) {
-      const matchId = searchResults[searchIndex].id;
-      return visibleNodes.findIndex((n) => n.id === matchId);
-    }
-    return undefined;
-  }, [searchIndex, searchResults, visibleNodes]);
-
-
   const handleCopyPath = (path: string) => {
     navigator.clipboard.writeText(path);
   };
@@ -55,15 +43,6 @@ export const JsonTreeView = () => {
     const str = typeof value === 'object' ? JSON.stringify(value, null, 2) : String(value);
     navigator.clipboard.writeText(str);
   };
-
-  // Helper arrays for search indexes to speed up lookup
-  const searchMatchSet = useMemo(() => new Set(searchResults.map((r) => r.id)), [searchResults]);
-  const activeMatchId = useMemo(() => {
-    if (searchIndex >= 0 && searchResults[searchIndex]) {
-      return searchResults[searchIndex].id;
-    }
-    return null;
-  }, [searchIndex, searchResults]);
 
   // If JSON empty, render user instruction card
   if (!parsedJson) {
@@ -101,8 +80,6 @@ export const JsonTreeView = () => {
             width={dimensions.width || '100%'}
             itemCount={visibleNodes.length}
             itemSize={28}
-            scrollToIndex={activeSearchNodeIndex}
-            scrollTrigger={activeMatchId}
           >
             {({ index, style }: { index: number; style: any }) => {
               const node = visibleNodes[index];
@@ -110,8 +87,8 @@ export const JsonTreeView = () => {
                 <JsonNode
                   node={node}
                   style={style}
-                  isSearched={searchMatchSet.has(node.id)}
-                  isHighlighted={activeMatchId === node.id}
+                  isSearched={false}
+                  isHighlighted={false}
                   onToggle={togglePath}
                   onCopyPath={handleCopyPath}
                   onCopyValue={handleCopyValue}

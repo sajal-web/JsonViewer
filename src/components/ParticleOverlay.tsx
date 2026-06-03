@@ -9,6 +9,7 @@ interface Particle {
   char: string;
   color: string;
   size: number;
+  width: number;
   alpha: number;
   rotation: number;
   rotationSpeed: number;
@@ -20,6 +21,7 @@ export const ParticleOverlay: React.FC = () => {
   const burstTrigger = useJsonStore((state) => state.burstTrigger);
   const particlesRef = useRef<Particle[]>([]);
   const animationFrameIdRef = useRef<number | null>(null);
+  const lastBurstTimeRef = useRef<number>(0);
 
   const colors = [
     '#3b82f6', // blue
@@ -57,16 +59,18 @@ export const ParticleOverlay: React.FC = () => {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
+    // Additive blending so particles shine brightly over dark backgrounds
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.globalCompositeOperation = 'lighter';
 
     const particles = particlesRef.current;
     for (let i = particles.length - 1; i >= 0; i--) {
       const p = particles[i];
       p.x += p.vx;
       p.y += p.vy;
-      p.vy += 0.15; // Gravity
-      p.vx *= 0.98; // Friction
-      p.vy *= 0.98;
+      p.vy += 0.12; // Gentle Gravity
+      p.vx *= 0.97; // Smooth Friction
+      p.vy *= 0.97;
       p.rotation += p.rotationSpeed;
       p.alpha -= p.decay;
 
@@ -79,24 +83,14 @@ export const ParticleOverlay: React.FC = () => {
       ctx.globalAlpha = p.alpha;
       ctx.fillStyle = p.color;
       ctx.font = `bold ${p.size}px monospace`;
-      
-      // Apply enhanced glow and shadow for neon look
-      ctx.shadowBlur = 16;
-      ctx.shadowColor = p.color;
-      ctx.shadowOffsetX = 0;
-      ctx.shadowOffsetY = 0;
 
       ctx.translate(p.x, p.y);
       ctx.rotate(p.rotation);
-      
-      // Draw text with glow effect
-      const textWidth = ctx.measureText(p.char).width;
-      ctx.fillText(p.char, -textWidth / 2, p.size / 2);
-      
-      // Add secondary glow layer
-      ctx.globalAlpha = p.alpha * 0.5;
-      ctx.shadowBlur = 24;
-      ctx.fillText(p.char, -textWidth / 2, p.size / 2);
+      ctx.scale(Math.max(0.6, p.alpha), Math.max(0.6, p.alpha)); // Smooth shrinking effect
+      ctx.shadowBlur = Math.max(8, p.size * 1.6);
+      ctx.shadowColor = p.color;
+      // Render text using precalculated width
+      ctx.fillText(p.char, -p.width / 2, p.size / 2);
       
       ctx.restore();
     }
@@ -114,24 +108,44 @@ export const ParticleOverlay: React.FC = () => {
     if (!burstTrigger) return;
     const { x, y } = burstTrigger;
 
-    // Create more particles for a more impressive effect
-    const particleCount = 30 + Math.floor(Math.random() * 20);
+    const now = Date.now();
+    const timeSinceLastBurst = now - lastBurstTimeRef.current;
+    lastBurstTimeRef.current = now;
+
+    // Dynamically scale down particle counts if clicked rapidly, but keep it high for single clicks
+    let particleCount = 20 + Math.floor(Math.random() * 12);
+    if (timeSinceLastBurst < 250) {
+      particleCount = 8 + Math.floor(Math.random() * 4);
+    }
+
     for (let i = 0; i < particleCount; i++) {
       const angle = Math.random() * Math.PI * 2;
-      const speed = 2 + Math.random() * 8;
+      const speed = 2.5 + Math.random() * 5.5;
+      const char = characters[Math.floor(Math.random() * characters.length)];
+      const size = 12 + Math.floor(Math.random() * 12);
+      
+      // Precompute monospace text width (roughly 60% of size times character length)
+      const width = char.length * size * 0.6;
+
       particlesRef.current.push({
         x,
         y,
         vx: Math.cos(angle) * speed,
-        vy: Math.sin(angle) * speed - 3, // Emphasize upward momentum
-        char: characters[Math.floor(Math.random() * characters.length)],
+        vy: Math.sin(angle) * speed - 2.5, // Emphasize upward momentum
+        char,
         color: colors[Math.floor(Math.random() * colors.length)],
-        size: 12 + Math.floor(Math.random() * 14),
-        alpha: 1.0,
+        size,
+        width,
+        alpha: 0.96 + Math.random() * 0.08,
         rotation: Math.random() * Math.PI * 2,
         rotationSpeed: (Math.random() - 0.5) * 0.2,
-        decay: 0.01 + Math.random() * 0.015,
+        decay: 0.012 + Math.random() * 0.01,
       });
+    }
+
+    // Cap total active particles to prevent lag under rapid clicks
+    if (particlesRef.current.length > 120) {
+      particlesRef.current.splice(0, particlesRef.current.length - 120);
     }
 
     if (animationFrameIdRef.current === null) {

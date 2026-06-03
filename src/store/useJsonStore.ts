@@ -3,8 +3,33 @@ import type { ValidationError, AppTheme, HistoryItem, SearchMatch, AppPage } fro
 import { parseJsonWithErrorInfo, parseYamlWithErrorInfo, jsonToYaml, yamlToJson, sortJson, jsonToTypeScript, jsonToLanguage } from '../utils/jsonParser';
 import type { CodeLanguage } from '../utils/jsonParser';
 
-import { getPathsMatchingSearch } from '../utils/treeUtils';
 import { DEFAULT_JSON_MOCK } from '../constants';
+
+function escapeRegExp(query: string) {
+  return query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function findMatchesInText(text: string, query: string): SearchMatch[] {
+  const escaped = escapeRegExp(query);
+  const results: SearchMatch[] = [];
+
+  const lines = text.split('\n');
+  lines.forEach((lineText, lineIndex) => {
+    let match: RegExpExecArray | null;
+    const lineRegex = new RegExp(escaped, 'gi');
+    while ((match = lineRegex.exec(lineText)) !== null) {
+      results.push({
+        id: `${lineIndex + 1}:${match.index + 1}:${match[0].length}`,
+        matchType: 'value',
+      });
+      if (lineRegex.lastIndex === match.index) {
+        lineRegex.lastIndex += 1;
+      }
+    }
+  });
+
+  return results;
+}
 
 interface JsonStore {
   rawInput: string;
@@ -118,8 +143,17 @@ export const useJsonStore = create<JsonStore>((set, get) => {
     setRawInput: (text: string, bypassWorker = false) => {
       set({ rawInput: text });
 
+      const searchQuery = get().searchQuery;
+      if (searchQuery.trim()) {
+        const results = findMatchesInText(text, searchQuery);
+        set({
+          searchResults: results,
+          searchIndex: results.length > 0 ? 0 : -1,
+        });
+      }
+
       if (!text.trim()) {
-        set({ parsedJson: null, validationError: null });
+        set({ parsedJson: null, validationError: null, searchResults: [], searchIndex: -1 });
         return;
       }
 
@@ -377,26 +411,16 @@ export const useJsonStore = create<JsonStore>((set, get) => {
 
     setSearchQuery: (query) => {
       set({ searchQuery: query });
-      const data = get().parsedJson;
-      if (!query || !data) {
+      const rawText = get().rawInput;
+      if (!query.trim()) {
         set({ searchResults: [], searchIndex: -1 });
         return;
       }
 
-      // Find paths matching search
-      const paths = getPathsMatchingSearch(data, query);
-      const results: SearchMatch[] = Array.from(paths)
-        .filter(path => path !== '$') // skip root level generic match unless it specifically matches
-        .map(path => ({ id: path, matchType: 'both' }));
-
-      // Add parents of matches to expandedPaths so the matches are visible!
-      const expanded = new Set(get().expandedPaths);
-      paths.forEach(p => expanded.add(p));
-
+      const results = findMatchesInText(rawText, query);
       set({
         searchResults: results,
         searchIndex: results.length > 0 ? 0 : -1,
-        expandedPaths: expanded,
       });
     },
 

@@ -61,7 +61,7 @@ export const SearchBar: React.FC = () => {
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Search keys or values... (Cmd + F / Enter to navigate)"
+          placeholder="Search in editor content... (Cmd + F / Enter to navigate)"
           className="w-full pl-9 pr-24 py-1.5 text-xs bg-slate-950/80 hover:bg-slate-950 border border-slate-800 hover:border-slate-700/80 focus:border-blue-500 text-slate-200 placeholder-slate-550 rounded-lg outline-none transition-all focus:ring-1 focus:ring-blue-500"
           id="search-input-field"
         />
@@ -104,7 +104,7 @@ export const SearchBar: React.FC = () => {
 
         <div className="hidden lg:flex items-center gap-1 text-[10px] text-slate-500 ml-2">
           <Info className="w-3 h-3 text-slate-650" />
-          <span>Autofolds expanded to highlight matches</span>
+          <span>Search matches are highlighted directly in the editor</span>
         </div>
       </div>
     </div>

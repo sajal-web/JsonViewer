@@ -58,9 +58,10 @@ loader.init().then((monaco) => {
 });
 
 export const MonacoEditorPanel = () => {
-  const { rawInput, setRawInput, activeMode, theme, validationError } = useJsonStore();
+  const { rawInput, setRawInput, activeMode, theme, validationError, searchResults, searchIndex } = useJsonStore();
   const editorRef = useRef<any>(null);
   const monacoRef = useRef<Monaco | null>(null);
+  const decorationIdsRef = useRef<string[]>([]);
 
   const handleEditorDidMount = (editor: any, monaco: Monaco) => {
     editorRef.current = editor;
@@ -110,6 +111,37 @@ export const MonacoEditorPanel = () => {
       monaco.editor.setModelMarkers(model, 'json-validation', []);
     }
   }, [validationError]);
+
+  useEffect(() => {
+    if (!editorRef.current || !monacoRef.current) return;
+    const editor = editorRef.current;
+    const monaco = monacoRef.current;
+    const model = editor.getModel();
+    if (!model) return;
+
+    const decorations = searchResults
+      .map((match, index) => {
+        const parts = match.id.split(':').map(Number);
+        if (parts.length !== 3) return null;
+        const [lineNumber, startColumn, length] = parts;
+        return {
+          range: new monaco.Range(lineNumber, startColumn, lineNumber, startColumn + length),
+          options: {
+            inlineClassName: index === searchIndex ? 'search-match-active' : 'search-match',
+          },
+        };
+      })
+      .filter(Boolean);
+
+    decorationIdsRef.current = editor.deltaDecorations(decorationIdsRef.current, decorations as any);
+
+    if (searchIndex >= 0 && searchResults[searchIndex]) {
+      const [lineNumber, startColumn, length] = searchResults[searchIndex].id.split(':').map(Number);
+      const range = new monaco.Range(lineNumber, startColumn, lineNumber, startColumn + length);
+      editor.revealRangeInCenter(range, monaco.editor.ScrollType.Smooth);
+      editor.setSelection(range);
+    }
+  }, [searchResults, searchIndex]);
 
   return (
     <div className="flex-1 w-full h-full relative overflow-hidden flex flex-col bg-[#0b0f19] dark:bg-[#0b0f19] light:bg-white border-r border-slate-800">
