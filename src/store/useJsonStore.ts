@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import type { ValidationError, AppTheme, HistoryItem, SearchMatch, AppPage } from '../types';
-import { parseJsonWithErrorInfo, parseYamlWithErrorInfo, jsonToYaml, yamlToJson } from '../utils/jsonParser';
+import { parseJsonWithErrorInfo, parseYamlWithErrorInfo, jsonToYaml, yamlToJson, sortJson, jsonToTypeScript, jsonToLanguage } from '../utils/jsonParser';
+import type { CodeLanguage } from '../utils/jsonParser';
 
 import { getPathsMatchingSearch } from '../utils/treeUtils';
 import { DEFAULT_JSON_MOCK } from '../constants';
@@ -39,6 +40,11 @@ interface JsonStore {
   addHistoryItem: (label: string, data: string) => void;
   clearHistory: () => void;
   setActivePage: (page: AppPage) => void;
+  sortKeys: () => void;
+  exportToTypeScript: () => string | null;
+  exportToLanguage: (language: CodeLanguage) => string | null;
+  burstTrigger: { x: number; y: number; time: number } | null;
+  triggerBurst: (x: number, y: number) => void;
 }
 
 // Instantiate worker with fallback
@@ -430,6 +436,42 @@ export const useJsonStore = create<JsonStore>((set, get) => {
     },
     setActivePage: (page) => {
       set({ activePage: page, isSidebarOpen: false });
+    },
+    sortKeys: () => {
+      const parsed = get().parsedJson;
+      if (!parsed) return;
+      try {
+        const sorted = sortJson(parsed);
+        const text = get().activeMode === 'json' ? JSON.stringify(sorted, null, 2) : jsonToYaml(JSON.stringify(sorted));
+        set({ parsedJson: sorted, rawInput: text, validationError: null });
+        get().addHistoryItem('Sorted Keys', text);
+      } catch (err: any) {
+        set({ validationError: { message: `Sort keys failed: ${err.message}` } });
+      }
+    },
+    exportToTypeScript: () => {
+      const parsed = get().parsedJson;
+      if (!parsed) return null;
+      try {
+        return jsonToTypeScript(parsed);
+      } catch (err: any) {
+        set({ validationError: { message: `TS Export failed: ${err.message}` } });
+        return null;
+      }
+    },
+    exportToLanguage: (language) => {
+      const parsed = get().parsedJson;
+      if (!parsed) return null;
+      try {
+        return jsonToLanguage(parsed, language);
+      } catch (err: any) {
+        set({ validationError: { message: `${language} export failed: ${err.message}` } });
+        return null;
+      }
+    },
+    burstTrigger: null,
+    triggerBurst: (x, y) => {
+      set({ burstTrigger: { x, y, time: Date.now() } });
     },
   };
 });

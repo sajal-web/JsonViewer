@@ -12,6 +12,7 @@ import AboutPage from '../pages/AboutPage';
 import ContactPage from '../pages/ContactPage';
 import TermsPage from '../pages/TermsPage';
 import PrivacyPage from '../pages/PrivacyPage';
+import ParticleOverlay from './ParticleOverlay';
 
 export const AppLayout: React.FC = () => {
   const {
@@ -154,6 +155,9 @@ export const AppLayout: React.FC = () => {
           renderPage()
         )}
       </main>
+      
+      {/* Satisfying developer particle Canvas overlay */}
+      <ParticleOverlay />
     </div>
   );
 };

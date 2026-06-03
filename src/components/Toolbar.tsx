@@ -9,10 +9,13 @@ import {
   ChevronsUp,
   AlignLeft,
   Minimize2,
+  ArrowUpDown,
+  FileCode,
 } from 'lucide-react';
 import { useJsonStore } from '../store/useJsonStore';
 import ThemeToggle from './ThemeToggle';
 import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export const Toolbar = () => {
   const {
@@ -25,15 +28,41 @@ export const Toolbar = () => {
     clearAll,
     expandAll,
     collapseAll,
+    sortKeys,
+    exportToTypeScript,
+    exportToLanguage,
+    triggerBurst,
   } = useJsonStore();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [copied, setCopied] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  const handleCopy = async () => {
+  const EXPORT_LANGUAGES = [
+    { value: 'typescript', label: 'TypeScript' },
+    { value: 'python', label: 'Python' },
+    { value: 'go', label: 'Go' },
+    { value: 'csharp', label: 'C#' },
+    { value: 'java', label: 'Java' },
+    { value: 'kotlin', label: 'Kotlin' },
+    { value: 'swift', label: 'Swift' },
+  ] as const;
+  type ExportLanguage = (typeof EXPORT_LANGUAGES)[number]['value'];
+
+  const [exportLanguage, setExportLanguage] = useState<ExportLanguage>('typescript');
+
+  const languageLabel = EXPORT_LANGUAGES.find((item) => item.value === exportLanguage)?.label ?? 'TypeScript';
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 2500);
+  };
+
+  const handleCopy = async (x: number, y: number) => {
     try {
       await navigator.clipboard.writeText(rawInput);
       setCopied(true);
+      triggerBurst(x, y);
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
       console.error('Failed to copy to clipboard', err);
@@ -88,6 +117,37 @@ export const Toolbar = () => {
     }
   };
 
+  const handleSortKeys = (e: React.MouseEvent) => {
+    sortKeys();
+    triggerBurst(e.clientX, e.clientY);
+    showToast('Keys sorted alphabetically!');
+  };
+
+  const handleExportCode = (e: React.MouseEvent) => {
+    const result =
+      exportLanguage === 'typescript'
+        ? exportToTypeScript()
+        : exportToLanguage(exportLanguage as ExportLanguage);
+
+    if (result) {
+      navigator.clipboard.writeText(result);
+      triggerBurst(e.clientX, e.clientY);
+      showToast(`${languageLabel} output copied to clipboard!`);
+    } else {
+      showToast(`${languageLabel} export failed. Ensure JSON/YAML is valid.`);
+    }
+  };
+
+  const handleFormatClick = (e: React.MouseEvent) => {
+    formatJson();
+    triggerBurst(e.clientX, e.clientY);
+  };
+
+  const handleMinifyClick = (e: React.MouseEvent) => {
+    minifyJson();
+    triggerBurst(e.clientX, e.clientY);
+  };
+
   return (
     <div className="h-14 border-b border-slate-800 bg-slate-900/90 backdrop-blur px-4 flex items-center justify-between z-10 sticky top-0 flex-shrink-0 select-none">
       {/* File Actions Group */}
@@ -102,7 +162,7 @@ export const Toolbar = () => {
         </button>
 
         <button
-          onClick={handleCopy}
+          onClick={(e) => handleCopy(e.clientX, e.clientY)}
           className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md bg-slate-850 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-slate-100 transition-all cursor-pointer focus:outline-none"
           title="Copy contents"
         >
@@ -174,7 +234,7 @@ export const Toolbar = () => {
 
         {/* Format / Minify Actions */}
         <button
-          onClick={formatJson}
+          onClick={handleFormatClick}
           className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md bg-slate-850 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-slate-100 transition-all cursor-pointer focus:outline-none"
           title="Format (Pretty Print) (Cmd+Shift+F)"
           id="format-btn"
@@ -184,7 +244,7 @@ export const Toolbar = () => {
         </button>
 
         <button
-          onClick={minifyJson}
+          onClick={handleMinifyClick}
           className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md bg-slate-850 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-slate-100 transition-all cursor-pointer focus:outline-none"
           title="Minify JSON (collapses spaces)"
           id="minify-btn"
@@ -192,6 +252,41 @@ export const Toolbar = () => {
           <Minimize2 className="w-3.5 h-3.5" />
           <span>Minify</span>
         </button>
+
+        <button
+          onClick={handleSortKeys}
+          disabled={!rawInput.trim()}
+          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md bg-slate-850 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-slate-100 disabled:opacity-40 disabled:pointer-events-none transition-all cursor-pointer focus:outline-none"
+          title="Sort keys alphabetically"
+        >
+          <ArrowUpDown className="w-3.5 h-3.5" />
+          <span>Sort Keys</span>
+        </button>
+
+        <div className="flex items-center gap-2">
+          <select
+            value={exportLanguage}
+            onChange={(event) => setExportLanguage(event.target.value as ExportLanguage)}
+            className="h-9 rounded-md bg-slate-850 border border-slate-800 text-slate-200 text-xs px-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            title="Select target export language"
+          >
+            {EXPORT_LANGUAGES.map((option) => (
+              <option key={option.value} value={option.value} className="bg-slate-900 text-slate-200">
+                {option.label}
+              </option>
+            ))}
+          </select>
+
+          <button
+            onClick={handleExportCode}
+            disabled={!rawInput.trim()}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-md bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 border border-blue-500/20 text-white transition-all cursor-pointer focus:outline-none shadow-md shadow-blue-500/10 hover:shadow-blue-500/25 disabled:opacity-40 disabled:pointer-events-none"
+            title={`Generate ${languageLabel} code & copy to clipboard`}
+          >
+            <FileCode className="w-3.5 h-3.5 text-blue-200" />
+            <span>{`JSON to ${languageLabel}`}</span>
+          </button>
+        </div>
 
         <span className="w-px h-5 bg-slate-800 mx-1" />
 
@@ -227,6 +322,22 @@ export const Toolbar = () => {
           <span>Clear</span>
         </button>
       </div>
+
+      {/* Floaty Notification Toast */}
+      <AnimatePresence>
+        {toastMessage && (
+          <motion.div
+            initial={{ opacity: 0, y: -10, x: '-50%', scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, x: '-50%', scale: 1 }}
+            exit={{ opacity: 0, y: -10, x: '-50%', scale: 0.95 }}
+            transition={{ type: 'spring', damping: 20, stiffness: 300 }}
+            className="absolute top-16 left-1/2 px-4 py-2 bg-slate-900/90 border border-slate-800 text-slate-200 rounded-lg shadow-xl text-xs font-medium backdrop-blur-md flex items-center gap-2 z-[999]"
+          >
+            <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
+            <span>{toastMessage}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
