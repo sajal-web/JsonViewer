@@ -3,6 +3,8 @@ import React, { useEffect, useRef } from 'react';
 interface TrailParticle {
   x: number;
   y: number;
+  px: number;
+  py: number;
   vx: number;
   vy: number;
   size: number;
@@ -12,31 +14,39 @@ interface TrailParticle {
   rotation: number;
   rotationSpeed: number;
   char?: string;
-  type: 'glow' | 'star' | 'char';
-  distFromOrigin: number;
+  type: 'halo' | 'ribbon' | 'spark' | 'glyph';
+  life: number;
+  maxLife: number;
+  turbulence: number;
 }
+
+// Professional easing functions
+const easing = {
+  easeOutCubic: (t: number) => 1 - Math.pow(1 - t, 3),
+  easeInOutQuad: (t: number) => (t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t),
+  easeOutQuart: (t: number) => 1 - Math.pow(1 - t, 4),
+};
 
 export const CursorTrail: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const particlesRef = useRef<TrailParticle[]>([]);
   const animationFrameIdRef = useRef<number | null>(null);
   const lastPositionRef = useRef({ x: 0, y: 0 });
-  const velocityRef = useRef({ x: 0, y: 0 });
+  const velocityRef = useRef({ x: 0, y: 0, magnitude: 0 });
   const moveTimeoutRef = useRef<number | null>(null);
   const lastClickTimeRef = useRef<number>(0);
+  const timeRef = useRef<number>(0);
 
   const colors = [
-    '#3b82f6', // blue
-    '#06b6d4', // cyan
-    '#34d399', // emerald
-    '#8b5cf6', // violet
-    '#ec4899', // pink
-    '#f59e0b', // amber
-    '#ef4444', // red
-    '#10b981', // green
+    { main: '#3b82f6', light: '#60a5fa', dark: '#1e40af' },
+    { main: '#06b6d4', light: '#22d3ee', dark: '#0369a1' },
+    { main: '#34d399', light: '#6ee7b7', dark: '#059669' },
+    { main: '#8b5cf6', light: '#a78bfa', dark: '#5b21b6' },
+    { main: '#ec4899', light: '#f472b6', dark: '#be185d' },
+    { main: '#f59e0b', light: '#fbbf24', dark: '#92400e' },
   ];
 
-  const chars = ['✨', '⚡', '💎', '🎯', '✓', '→', '◆', '★', '♦'];
+  const glyphs = ['◆', '✦', '✧', '▪', '●', '▯', '⬢', '⬡'];
 
   // Setup canvas
   useEffect(() => {
@@ -53,74 +63,55 @@ export const CursorTrail: React.FC = () => {
     return () => window.removeEventListener('resize', resizeCanvas);
   }, []);
 
-  // Advanced animation loop
+  // Advanced animation loop with professional rendering
   const animate = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d', { alpha: true });
     if (!ctx) return;
 
-    // Use an additive blend to make colors pop against the background
+    timeRef.current += 1;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.globalCompositeOperation = 'lighter';
 
     const particles = particlesRef.current;
     for (let i = particles.length - 1; i >= 0; i--) {
       const p = particles[i];
+
+      p.px = p.x;
+      p.py = p.y;
+
+      const damping = 0.94;
+      p.vx *= damping;
+      p.vy *= damping;
       
-      // Physics: apply velocity and gravity for swirling effect
-      p.vx *= 0.96;
-      p.vy *= 0.96;
-      p.vy += 0.05; // slight gravity
-      
+      p.vy += 0.035;
+      p.vx += Math.sin(timeRef.current * 0.01 + p.turbulence) * 0.01;
+
       p.x += p.vx;
       p.y += p.vy;
-      p.opacity -= p.decay;
-      p.rotation += p.rotationSpeed;
-      p.distFromOrigin += 0.5;
 
-      if (p.opacity <= 0) {
+      p.life += 1;
+      const lifeProgress = p.life / p.maxLife;
+      
+      p.opacity = Math.max(0, (1 - lifeProgress) * (1 - lifeProgress));
+      p.rotation += p.rotationSpeed;
+
+      if (p.opacity <= 0.01) {
         particles.splice(i, 1);
         continue;
       }
 
       ctx.save();
-      ctx.globalAlpha = p.opacity;
 
-      if (p.type === 'glow') {
-        // High-performance double-circle neon glow
-        ctx.save();
-        ctx.shadowBlur = Math.max(6, p.size * 2);
-        ctx.shadowColor = p.color;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.size * 1.6, 0, Math.PI * 2);
-        ctx.fillStyle = p.color;
-        ctx.globalAlpha = Math.min(1, p.opacity * 0.35);
-        ctx.fill();
-        ctx.restore();
-
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.size * 0.6, 0, Math.PI * 2);
-        ctx.fillStyle = '#ffffff';
-        ctx.globalAlpha = Math.min(1, p.opacity * 0.95);
-        ctx.fill();
-      } else if (p.type === 'star') {
-        // Draw a rotating star
-        ctx.translate(p.x, p.y);
-        ctx.rotate(p.rotation);
-        ctx.fillStyle = p.color;
-        ctx.font = `bold ${p.size}px Arial`;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText('★', 0, 0);
-      } else if (p.type === 'char' && p.char) {
-        // Draw emoji/char
-        ctx.translate(p.x, p.y);
-        ctx.rotate(p.rotation);
-        ctx.font = `${p.size}px Arial`;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(p.char, 0, 0);
+      if (p.type === 'halo') {
+        renderHalo(ctx, p, lifeProgress);
+      } else if (p.type === 'ribbon') {
+        renderRibbon(ctx, p);
+      } else if (p.type === 'spark') {
+        renderSpark(ctx, p);
+      } else if (p.type === 'glyph') {
+        renderGlyph(ctx, p, lifeProgress);
       }
 
       ctx.restore();
@@ -133,83 +124,162 @@ export const CursorTrail: React.FC = () => {
     }
   };
 
-  // Handle mouse move
+  const renderHalo = (ctx: CanvasRenderingContext2D, p: TrailParticle, progress: number) => {
+    const eased = easing.easeOutCubic(progress);
+    
+    ctx.globalAlpha = p.opacity * 0.25 * eased;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.size * 2, 0, Math.PI * 2);
+    ctx.fillStyle = p.color;
+    ctx.fill();
+
+    ctx.globalAlpha = p.opacity * 0.5;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.size * 1.2, 0, Math.PI * 2);
+    ctx.fillStyle = p.color;
+    ctx.fill();
+
+    ctx.globalAlpha = p.opacity * 0.9;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.size * 0.4, 0, Math.PI * 2);
+    ctx.fillStyle = '#ffffff';
+    ctx.fill();
+  };
+
+  const renderRibbon = (ctx: CanvasRenderingContext2D, p: TrailParticle) => {
+    ctx.globalAlpha = p.opacity * 0.5;
+    ctx.strokeStyle = p.color;
+    ctx.lineWidth = p.size;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.beginPath();
+    ctx.moveTo(p.px, p.py);
+    ctx.lineTo(p.x, p.y);
+    ctx.stroke();
+
+    ctx.globalAlpha = p.opacity * 0.8;
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = p.size * 0.3;
+    ctx.beginPath();
+    ctx.moveTo(p.px, p.py);
+    ctx.lineTo(p.x, p.y);
+    ctx.stroke();
+  };
+
+  const renderSpark = (ctx: CanvasRenderingContext2D, p: TrailParticle) => {
+    ctx.strokeStyle = p.color;
+    ctx.lineWidth = p.size * 0.7;
+    ctx.lineCap = 'round';
+    ctx.globalAlpha = p.opacity * 0.7;
+    ctx.beginPath();
+    ctx.moveTo(p.px, p.py);
+    ctx.lineTo(p.x, p.y);
+    ctx.stroke();
+
+    ctx.globalAlpha = p.opacity * 0.9;
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.size * 0.5, 0, Math.PI * 2);
+    ctx.fill();
+  };
+
+  const renderGlyph = (ctx: CanvasRenderingContext2D, p: TrailParticle, progress: number) => {
+    ctx.translate(p.x, p.y);
+    ctx.rotate(p.rotation);
+    
+    const eased = easing.easeInOutQuad(progress);
+    const scale = 1 - eased * 0.3;
+    ctx.scale(scale, scale);
+
+    ctx.globalAlpha = p.opacity * 0.8;
+    ctx.fillStyle = '#ffffff';
+    ctx.font = `bold ${p.size}px 'Courier New', monospace`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(p.char || '◆', 0, 0);
+  };
+
+  // Handle mouse move with intelligent particle generation
   const handleMouseMove = (e: MouseEvent) => {
     const { clientX, clientY } = e;
     const { x: lastX, y: lastY } = lastPositionRef.current;
 
-    // Calculate distance and velocity
     const dx = clientX - lastX;
     const dy = clientY - lastY;
     const dist = Math.hypot(dx, dy);
 
-    // Update velocity for particles to inherit movement
     velocityRef.current = {
-      x: dx * 0.8,
-      y: dy * 0.8,
+      x: dx * 0.85,
+      y: dy * 0.85,
+      magnitude: dist,
     };
 
-    // Only create particles if moved more than threshold
-    if (dist > 4) {
-      const particleCount = Math.min(6, Math.ceil(dist / 6));
-      
-      for (let i = 0; i < particleCount; i++) {
-        const randomType = Math.random();
-        let type: 'glow' | 'star' | 'char' = 'glow';
-        let char: string | undefined;
+    if (dist > 3) {
+      const particleCount = Math.min(3, Math.max(1, Math.floor(dist / 8)));
+      const typeRatio = Math.min(1, dist / 40);
 
-        if (randomType > 0.85) {
-          type = 'char';
-          char = chars[Math.floor(Math.random() * chars.length)];
-        } else if (randomType > 0.65) {
-          type = 'star';
+      for (let i = 0; i < particleCount; i++) {
+        const rand = Math.random();
+        let type: 'halo' | 'ribbon' | 'spark' | 'glyph';
+
+        if (rand > typeRatio + 0.3) {
+          type = 'halo';
+        } else if (rand > typeRatio + 0.1) {
+          type = 'ribbon';
+        } else if (rand > typeRatio) {
+          type = 'spark';
+        } else {
+          type = 'glyph';
         }
 
+        const colorPalette = colors[Math.floor(Math.random() * colors.length)];
         const angle = Math.random() * Math.PI * 2;
-        const speed = 1 + Math.random() * 2;
+        const speed = 0.6 + Math.random() * 2;
+        const turbulence = Math.random() * 8;
+        const maxLife = 35 + Math.random() * 25;
 
         particlesRef.current.push({
-          x: clientX + (Math.random() - 0.5) * 10,
-          y: clientY + (Math.random() - 0.5) * 10,
-          vx: Math.cos(angle) * speed + velocityRef.current.x * 0.5,
-          vy: Math.sin(angle) * speed + velocityRef.current.y * 0.5,
-          size: type === 'char' ? 14 + Math.random() * 6 : 6 + Math.random() * 5,
-          opacity: 0.88 + Math.random() * 0.22,
-          color: colors[Math.floor(Math.random() * colors.length)],
-          decay: 0.01 + Math.random() * 0.012,
+          x: clientX + (Math.random() - 0.5) * 8,
+          y: clientY + (Math.random() - 0.5) * 8,
+          px: clientX,
+          py: clientY,
+          vx: Math.cos(angle) * speed + velocityRef.current.x * 0.3,
+          vy: Math.sin(angle) * speed + velocityRef.current.y * 0.3,
+          size: type === 'glyph' ? 8 + Math.random() * 4 : 3 + Math.random() * 3,
+          opacity: 0.9 + Math.random() * 0.1,
+          color: colorPalette.main,
+          decay: 0.01,
           rotation: Math.random() * Math.PI * 2,
-          rotationSpeed: (Math.random() - 0.5) * 0.2,
-          char,
+          rotationSpeed: (Math.random() - 0.5) * 0.15,
           type,
-          distFromOrigin: 0,
+          char: type === 'glyph' ? glyphs[Math.floor(Math.random() * glyphs.length)] : undefined,
+          life: 0,
+          maxLife,
+          turbulence,
         });
       }
 
-      // Cap total active particles for smooth trail
-      if (particlesRef.current.length > 140) {
-        particlesRef.current.splice(0, particlesRef.current.length - 140);
+      if (particlesRef.current.length > 80) {
+        particlesRef.current.splice(0, particlesRef.current.length - 80);
       }
 
       lastPositionRef.current = { x: clientX, y: clientY };
 
-      // Start animation if not running
       if (animationFrameIdRef.current === null) {
         animate();
       }
 
-      // Clear existing timeout
       if (moveTimeoutRef.current) {
         clearTimeout(moveTimeoutRef.current);
       }
 
-      // Set timeout to stop adding particles after movement stops
       moveTimeoutRef.current = setTimeout(() => {
-        // Keep existing particles to fade out naturally
-      }, 200);
+        // Particles fade naturally
+      }, 150);
     }
   };
 
-  // Handle clicks for burst effect
+  // Handle clicks with burst effect
   const handleClick = (e: MouseEvent) => {
     const target = e.target as HTMLElement | null;
     if (
@@ -224,37 +294,42 @@ export const CursorTrail: React.FC = () => {
     const timeSinceLastClick = now - lastClickTimeRef.current;
     lastClickTimeRef.current = now;
 
-    // Rich burst count scaled down dynamically if clicked extremely fast
-    let burstCount = 12 + Math.floor(Math.random() * 8);
+    let burstCount = 10 + Math.floor(Math.random() * 6);
     if (timeSinceLastClick < 250) {
-      burstCount = 6 + Math.floor(Math.random() * 4);
+      burstCount = 5 + Math.floor(Math.random() * 3);
     }
 
+    const colorPalette = colors[Math.floor(Math.random() * colors.length)];
+
     for (let i = 0; i < burstCount; i++) {
-      const angle = (i / burstCount) * Math.PI * 2;
-      const speed = 3.5 + Math.random() * 4;
-      const randomType = Math.random() > 0.5 ? 'star' : 'char';
+      const angle = (i / burstCount) * Math.PI * 2 + (Math.random() - 0.5) * 0.3;
+      const speed = 2.5 + Math.random() * 3;
+      const rand = Math.random();
+      const type: 'halo' | 'spark' = rand > 0.4 ? 'spark' : 'halo';
+      const maxLife = 50 + Math.random() * 30;
 
       particlesRef.current.push({
         x: clientX,
         y: clientY,
+        px: clientX,
+        py: clientY,
         vx: Math.cos(angle) * speed,
-        vy: Math.sin(angle) * speed - 1.5,
-        size: randomType === 'char' ? 14 + Math.random() * 6 : 7 + Math.random() * 5,
-        opacity: 0.92 + Math.random() * 0.08,
-        color: colors[Math.floor(Math.random() * colors.length)],
-        decay: 0.012 + Math.random() * 0.01,
+        vy: Math.sin(angle) * speed - 1.2,
+        size: type === 'halo' ? 4 + Math.random() * 3 : 3 + Math.random() * 2.5,
+        opacity: 0.95,
+        color: colorPalette.main,
+        decay: 0.008,
         rotation: Math.random() * Math.PI * 2,
-        rotationSpeed: (Math.random() - 0.5) * 0.3,
-        char: randomType === 'char' ? chars[Math.floor(Math.random() * chars.length)] : undefined,
-        type: randomType as 'star' | 'char',
-        distFromOrigin: 0,
+        rotationSpeed: (Math.random() - 0.5) * 0.2,
+        type,
+        life: 0,
+        maxLife,
+        turbulence: Math.random() * 5,
       });
     }
 
-    // Cap total active particles
-    if (particlesRef.current.length > 80) {
-      particlesRef.current.splice(0, particlesRef.current.length - 80);
+    if (particlesRef.current.length > 60) {
+      particlesRef.current.splice(0, particlesRef.current.length - 60);
     }
 
     if (animationFrameIdRef.current === null) {
@@ -265,7 +340,7 @@ export const CursorTrail: React.FC = () => {
   useEffect(() => {
     window.addEventListener('mousemove', handleMouseMove);
     window.addEventListener('click', handleClick);
-    
+
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('click', handleClick);
@@ -288,3 +363,4 @@ export const CursorTrail: React.FC = () => {
 };
 
 export default CursorTrail;
+

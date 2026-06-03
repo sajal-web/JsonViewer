@@ -86,9 +86,8 @@ export const ParticleOverlay: React.FC = () => {
 
       ctx.translate(p.x, p.y);
       ctx.rotate(p.rotation);
-      ctx.scale(Math.max(0.6, p.alpha), Math.max(0.6, p.alpha)); // Smooth shrinking effect
-      ctx.shadowBlur = Math.max(8, p.size * 1.6);
-      ctx.shadowColor = p.color;
+      ctx.scale(Math.max(0.5, p.alpha), Math.max(0.5, p.alpha));
+      
       // Render text using precalculated width
       ctx.fillText(p.char, -p.width / 2, p.size / 2);
       
@@ -113,9 +112,9 @@ export const ParticleOverlay: React.FC = () => {
     lastBurstTimeRef.current = now;
 
     // Dynamically scale down particle counts if clicked rapidly, but keep it high for single clicks
-    let particleCount = 20 + Math.floor(Math.random() * 12);
+    let particleCount = 16 + Math.floor(Math.random() * 8);
     if (timeSinceLastBurst < 250) {
-      particleCount = 8 + Math.floor(Math.random() * 4);
+      particleCount = 6 + Math.floor(Math.random() * 3);
     }
 
     for (let i = 0; i < particleCount; i++) {
@@ -144,8 +143,8 @@ export const ParticleOverlay: React.FC = () => {
     }
 
     // Cap total active particles to prevent lag under rapid clicks
-    if (particlesRef.current.length > 120) {
-      particlesRef.current.splice(0, particlesRef.current.length - 120);
+    if (particlesRef.current.length > 80) {
+      particlesRef.current.splice(0, particlesRef.current.length - 80);
     }
 
     if (animationFrameIdRef.current === null) {
