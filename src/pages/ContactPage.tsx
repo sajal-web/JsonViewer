@@ -10,6 +10,16 @@ export const ContactPage: React.FC = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.email || !formData.message) return;
+
+    // Send via user's email client (no backend/API available)
+    const to = 'sajalmahata.dev@gmail.com';
+    const subject = `Contact: ${formData.name} (${new Date().toLocaleString()})`;
+    const body = `From: ${formData.name} <${formData.email}>\n\nMessage:\n${formData.message}`;
+
+    const mailtoUrl = `mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    window.location.href = mailtoUrl;
+
+    // Optimistic UI update
     setSubmitted(true);
     setTimeout(() => {
       setSubmitted(false);
