@@ -152,7 +152,7 @@ export const AppLayout: React.FC = () => {
             <span className="font-bold text-slate-100 text-sm tracking-tight flex items-center gap-1.5">
               JSON Viewer
               <span className="text-[9px] font-semibold bg-blue-500/10 border border-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded-full">
-                v1.0.0
+                v1.0.1
               </span>
             </span>
           </div>
