@@ -84,6 +84,50 @@ export const AppLayout: React.FC = () => {
     }
   }, [activePage]);
 
+  useEffect(() => {
+    let title = 'JSON Viewer Online - Format, Validate & Beautify JSON';
+    let description = 'Free online JSON Viewer and Formatter. Beautify, validate, minify, inspect and validate JSON instantly.';
+
+    if (activePage === 'diff') {
+      title = 'JSON Diff Checker - Compare JSON Files Online | JSON Viewer';
+      description = 'Compare two JSON files side-by-side online. Spot additions, modifications, and deletions instantly with code syntax highlighting and automated JSON path diff parsing.';
+    } else if (activePage === 'about') {
+      title = 'About Us - JSON Viewer';
+      description = 'Learn more about JSON Viewer, a developer-friendly tool to format, validate, and convert JSON/YAML.';
+    } else if (activePage === 'contact') {
+      title = 'Contact Us - JSON Viewer';
+      description = 'Get in touch with the JSON Viewer development team for feedback, bugs, or feature suggestions.';
+    } else if (activePage === 'terms') {
+      title = 'Terms of Service - JSON Viewer';
+      description = 'Read the terms of service governing the usage of the online JSON Viewer application.';
+    } else if (activePage === 'privacy') {
+      title = 'Privacy Policy - JSON Viewer';
+      description = 'Understand how JSON Viewer respects your privacy and ensures fully client-side secure parsing.';
+    }
+
+    document.title = title;
+
+    const updateMetaTag = (selector: string, attrName: string, value: string) => {
+      let meta = document.querySelector(selector);
+      if (!meta) {
+        meta = document.createElement('meta');
+        if (selector.startsWith('meta[name')) {
+          meta.setAttribute('name', attrName);
+        } else {
+          meta.setAttribute('property', attrName);
+        }
+        document.head.appendChild(meta);
+      }
+      meta.setAttribute('content', value);
+    };
+
+    updateMetaTag('meta[name="description"]', 'description', description);
+    updateMetaTag('meta[property="og:title"]', 'og:title', title);
+    updateMetaTag('meta[property="og:description"]', 'og:description', description);
+    updateMetaTag('meta[name="twitter:title"]', 'twitter:title', title);
+    updateMetaTag('meta[name="twitter:description"]', 'twitter:description', description);
+  }, [activePage]);
+
 
 
   const triggerFileUploadClick = () => {
