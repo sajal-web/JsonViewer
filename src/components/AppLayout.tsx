@@ -36,8 +36,10 @@ export const AppLayout: React.FC = () => {
       const searchParams = new URLSearchParams(window.location.search);
       const pageParam = searchParams.get('page') || searchParams.get('tool');
       const hash = window.location.hash;
+      const path = window.location.pathname;
       
       if (
+        path === '/json-compare' ||
         pageParam === 'json-diff-checker' || 
         pageParam === 'diff' || 
         hash === '#json-diff-checker' || 
@@ -45,13 +47,13 @@ export const AppLayout: React.FC = () => {
         hash === '#/diff'
       ) {
         setActivePage('diff');
-      } else if (pageParam === 'about' || hash === '#about') {
+      } else if (pageParam === 'about' || hash === '#about' || path === '/about') {
         setActivePage('about');
-      } else if (pageParam === 'contact' || hash === '#contact') {
+      } else if (pageParam === 'contact' || hash === '#contact' || path === '/contact') {
         setActivePage('contact');
-      } else if (pageParam === 'terms' || hash === '#terms') {
+      } else if (pageParam === 'terms' || hash === '#terms' || path === '/terms') {
         setActivePage('terms');
-      } else if (pageParam === 'privacy' || hash === '#privacy') {
+      } else if (pageParam === 'privacy' || hash === '#privacy' || path === '/privacy') {
         setActivePage('privacy');
       } else if (pageParam === 'editor' || hash === '#editor' || hash === '') {
         setActivePage('editor');
@@ -69,16 +71,15 @@ export const AppLayout: React.FC = () => {
   }, [setActivePage]);
 
   useEffect(() => {
-    const searchParams = new URLSearchParams(window.location.search);
-    const pageParam = searchParams.get('page') || searchParams.get('tool');
+    const path = window.location.pathname;
     if (activePage === 'editor') {
-      if (pageParam) {
-        window.history.pushState(null, '', window.location.pathname);
+      if (path !== '/') {
+        window.history.pushState(null, '', '/');
       }
     } else {
-      const targetParam = activePage === 'diff' ? 'json-diff-checker' : activePage;
-      if (pageParam !== targetParam) {
-        window.history.pushState(null, '', `?page=${targetParam}`);
+      const targetParam = activePage === 'diff' ? '/json-compare' : `/${activePage}`;
+      if (path !== targetParam) {
+        window.history.pushState(null, '', targetParam);
       }
     }
   }, [activePage]);
