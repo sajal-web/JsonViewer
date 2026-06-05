@@ -35,7 +35,6 @@ export const Toolbar = () => {
     exportToTypeScript,
     exportToLanguage,
     triggerBurst,
-    isDiffEnabled,
     setDiffEnabled,
   } = useJsonStore();
 

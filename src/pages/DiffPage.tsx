@@ -17,10 +17,10 @@ import {
   PlusCircle,
   Edit3
 } from 'lucide-react';
-import { DiffEditor, loader } from '@monaco-editor/react';
+import { DiffEditor } from '@monaco-editor/react';
 
 import { useJsonStore } from '../store/useJsonStore';
-import { parseJsonWithErrorInfo, parseYamlWithErrorInfo, jsonToYaml } from '../utils/jsonParser';
+import { parseJsonWithErrorInfo, parseYamlWithErrorInfo } from '../utils/jsonParser';
 
 const PLACEHOLDER_LEFT = `{
   "users": [
@@ -725,7 +725,7 @@ export const DiffPage: React.FC = () => {
                 cursorBlinking: 'smooth',
                 cursorSmoothCaretAnimation: 'on',
                 renderLineHighlight: 'all',
-              }}
+              } as any}
             />
           </div>
 

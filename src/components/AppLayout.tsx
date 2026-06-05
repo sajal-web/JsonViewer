@@ -34,10 +34,16 @@ export const AppLayout: React.FC = () => {
   useEffect(() => {
     const handleHashOrSearch = () => {
       const searchParams = new URLSearchParams(window.location.search);
-      const pageParam = searchParams.get('page');
+      const pageParam = searchParams.get('page') || searchParams.get('tool');
       const hash = window.location.hash;
       
-      if (pageParam === 'diff' || hash === '#diff' || hash === '#/diff') {
+      if (
+        pageParam === 'json-diff-checker' || 
+        pageParam === 'diff' || 
+        hash === '#json-diff-checker' || 
+        hash === '#diff' || 
+        hash === '#/diff'
+      ) {
         setActivePage('diff');
       } else if (pageParam === 'about' || hash === '#about') {
         setActivePage('about');
@@ -64,14 +70,15 @@ export const AppLayout: React.FC = () => {
 
   useEffect(() => {
     const searchParams = new URLSearchParams(window.location.search);
-    const pageParam = searchParams.get('page');
+    const pageParam = searchParams.get('page') || searchParams.get('tool');
     if (activePage === 'editor') {
       if (pageParam) {
         window.history.pushState(null, '', window.location.pathname);
       }
     } else {
-      if (pageParam !== activePage) {
-        window.history.pushState(null, '', `?page=${activePage}`);
+      const targetParam = activePage === 'diff' ? 'json-diff-checker' : activePage;
+      if (pageParam !== targetParam) {
+        window.history.pushState(null, '', `?page=${targetParam}`);
       }
     }
   }, [activePage]);
