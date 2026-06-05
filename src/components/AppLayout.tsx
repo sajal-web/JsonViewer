@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Menu, Loader2 } from 'lucide-react';
 import { useJsonStore } from '../store/useJsonStore';
 import Sidebar from './Sidebar';
@@ -12,6 +13,9 @@ import AboutPage from '../pages/AboutPage';
 import ContactPage from '../pages/ContactPage';
 import TermsPage from '../pages/TermsPage';
 import PrivacyPage from '../pages/PrivacyPage';
+import { DiffPage } from '../pages/DiffPage';
+
+
 import ParticleOverlay from './ParticleOverlay';
 import CursorTrail from './CursorTrail';
 
@@ -26,6 +30,52 @@ export const AppLayout: React.FC = () => {
     activePage,
     setActivePage,
   } = useJsonStore();
+
+  useEffect(() => {
+    const handleHashOrSearch = () => {
+      const searchParams = new URLSearchParams(window.location.search);
+      const pageParam = searchParams.get('page');
+      const hash = window.location.hash;
+      
+      if (pageParam === 'diff' || hash === '#diff' || hash === '#/diff') {
+        setActivePage('diff');
+      } else if (pageParam === 'about' || hash === '#about') {
+        setActivePage('about');
+      } else if (pageParam === 'contact' || hash === '#contact') {
+        setActivePage('contact');
+      } else if (pageParam === 'terms' || hash === '#terms') {
+        setActivePage('terms');
+      } else if (pageParam === 'privacy' || hash === '#privacy') {
+        setActivePage('privacy');
+      } else if (pageParam === 'editor' || hash === '#editor' || hash === '') {
+        setActivePage('editor');
+      }
+    };
+
+    handleHashOrSearch();
+    window.addEventListener('popstate', handleHashOrSearch);
+    window.addEventListener('hashchange', handleHashOrSearch);
+
+    return () => {
+      window.removeEventListener('popstate', handleHashOrSearch);
+      window.removeEventListener('hashchange', handleHashOrSearch);
+    };
+  }, [setActivePage]);
+
+  useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search);
+    const pageParam = searchParams.get('page');
+    if (activePage === 'editor') {
+      if (pageParam) {
+        window.history.pushState(null, '', window.location.pathname);
+      }
+    } else {
+      if (pageParam !== activePage) {
+        window.history.pushState(null, '', `?page=${activePage}`);
+      }
+    }
+  }, [activePage]);
+
 
 
   const triggerFileUploadClick = () => {
@@ -66,8 +116,11 @@ export const AppLayout: React.FC = () => {
         return <TermsPage />;
       case 'privacy':
         return <PrivacyPage />;
+      case 'diff':
+        return <DiffPage />;
       default:
         return null;
+
     }
   };
 

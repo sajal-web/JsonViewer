@@ -9,20 +9,24 @@ interface JsonNodeProps {
   style?: CSSProperties;
   isSearched: boolean;
   isHighlighted: boolean;
+  diffStatus?: 'added' | 'changed';
   onToggle: (path: string) => void;
   onCopyPath: (path: string) => void;
   onCopyValue: (value: any) => void;
 }
+
 
 export const JsonNode = memo(({
   node,
   style,
   isSearched,
   isHighlighted,
+  diffStatus,
   onToggle,
   onCopyPath,
   onCopyValue,
 }: JsonNodeProps) => {
+
   const [copiedValue, setCopiedValue] = useState(false);
   const [copiedPath, setCopiedPath] = useState(false);
 
@@ -88,7 +92,10 @@ export const JsonNode = memo(({
         node.hasChildren && "cursor-pointer hover:bg-slate-800/80 dark:hover:bg-slate-800/80 light:hover:bg-slate-100",
         !node.hasChildren && "hover:bg-slate-900/60 dark:hover:bg-slate-900/60 light:hover:bg-slate-50",
         isSearched && "bg-amber-500/10 border-l-amber-500",
+        diffStatus === 'added' && "bg-emerald-500/20 border-l-emerald-500 font-semibold",
+        diffStatus === 'changed' && "bg-amber-500/25 border-l-amber-500 font-semibold",
         isHighlighted && "bg-amber-500/25 border-l-amber-500 font-semibold"
+
       )}
     >
       {/* Indent Spacer */}

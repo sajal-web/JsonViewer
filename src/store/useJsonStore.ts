@@ -31,7 +31,166 @@ function findMatchesInText(text: string, query: string): SearchMatch[] {
   return results;
 }
 
+function safeTypeOf(val: any): string {
+  if (val === null) return 'null';
+  if (Array.isArray(val)) return 'array';
+  return typeof val;
+}
+
+function stablePrimitiveString(val: any): string {
+
+  if (val === null) return 'null';
+  return String(val);
+}
+
+function computeDiffByPath(prev: any, next: any): Record<string, 'added' | 'changed'> {
+  const out: Record<string, 'added' | 'changed'> = {};
+  if (prev === undefined || prev === null) {
+    return next && typeof next === 'object' ? { '$': 'added' } : { '$': 'changed' };
+  }
+
+  const prevHas = new Set<string>();
+  const nextHas = new Set<string>();
+
+  // Only include leaves + structural nodes; cap to avoid huge maps
+
+  const LIMIT = 20000;
+  let nodeCount = 0;
+
+  function traverseCapped(val: any, path: string, set: Set<string>) {
+    if (nodeCount > LIMIT) return;
+    nodeCount++;
+    set.add(path);
+    if (val && typeof val === 'object') {
+      if (Array.isArray(val)) {
+        for (let i = 0; i < val.length; i++) {
+          traverseCapped(val[i], `${path}[${i}]`, set);
+        }
+      } else {
+        for (const k of Object.keys(val)) {
+          const childPath = path === '$' ? `$.${k}` : `${path}.${k}`;
+          traverseCapped(val[k], childPath, set);
+        }
+      }
+    }
+  }
+
+  traverseCapped(prev, '$', prevHas);
+  nodeCount = 0;
+  traverseCapped(next, '$', nextHas);
+
+  // Added: exists in next but not prev
+  for (const p of nextHas) {
+    if (!prevHas.has(p)) out[p] = 'added';
+  }
+
+  // Changed: type or primitive value differs at same path
+  function getByPath(root: any, path: string): any {
+    if (path === '$') return root;
+    // path formats: $.k, $.a.b, $[0], $.arr[0].x
+    // We'll interpret token-by-token for safety.
+    let cur = root;
+    let i = 0;
+    // remove leading $
+    while (i < path.length && path[i] !== '$') i++;
+    let s = path.slice(1); // remove first '$'
+    // s starts with '.' or '['
+    while (s.length > 0) {
+      if (s[0] === '.') {
+        s = s.slice(1);
+        const m = /^[a-zA-Z0-9_\-]+/.exec(s);
+        if (!m) return undefined;
+        const key = m[0];
+        cur = cur?.[key];
+        s = s.slice(key.length);
+      } else if (s[0] === '[') {
+        s = s.slice(1);
+        const idxStr = s.split(']')[0];
+        const idx = Number(idxStr);
+        cur = cur?.[idx];
+        s = s.slice(idxStr.length + 1);
+      } else {
+        return undefined;
+      }
+    }
+    return cur;
+  }
+
+  const changedAt: Set<string> = new Set();
+  for (const p of nextHas) {
+    if (!prevHas.has(p)) continue;
+    const a = getByPath(prev, p);
+    const b = getByPath(next, p);
+
+    const typeA = safeTypeOf(a);
+    const typeB = safeTypeOf(b);
+
+    if (typeA !== typeB) {
+      out[p] = 'changed';
+      changedAt.add(p);
+      continue;
+    }
+
+    // Only compare primitives directly; for objects/arrays just mark if structure exists and we already have children paths
+    if (typeA === 'array' || typeA === 'object') {
+      // no-op (structural diffs handled by added paths)
+      continue;
+    }
+
+    const primA = stablePrimitiveString(a);
+    const primB = stablePrimitiveString(b);
+    if (primA !== primB) {
+      out[p] = 'changed';
+      changedAt.add(p);
+    }
+  }
+
+  // Bubble up changes to ancestors so parent rows are marked.
+  for (const p of changedAt) {
+    // '$.a.b[0].c' => ancestors
+    let cur = p;
+    while (cur.includes('.')) {
+      const lastDot = cur.lastIndexOf('.');
+      cur = cur.slice(0, lastDot);
+      if (cur && cur !== '$') {
+        if (!out[cur]) out[cur] = 'changed';
+      }
+    }
+    // array ancestors
+    cur = p;
+    while (cur.includes('[')) {
+      const lastBracket = cur.lastIndexOf('[');
+      cur = cur.slice(0, lastBracket);
+      if (cur && cur !== '$') {
+        if (!out[cur]) out[cur] = 'changed';
+      }
+    }
+    if (!out['$']) out['$'] = 'changed';
+  }
+
+  // Bubble up added nodes to ancestors as changed to indicate structural change.
+  for (const p of Object.keys(out)) {
+    if (out[p] !== 'added') continue;
+    let cur = p;
+    while (cur.includes('.')) {
+      const lastDot = cur.lastIndexOf('.');
+      cur = cur.slice(0, lastDot);
+      if (cur && cur !== '$' && !out[cur]) out[cur] = 'changed';
+    }
+    cur = p;
+    while (cur.includes('[')) {
+      const lastBracket = cur.lastIndexOf('[');
+      cur = cur.slice(0, lastBracket);
+      if (cur && cur !== '$' && !out[cur]) out[cur] = 'changed';
+    }
+    if (!out['$']) out['$'] = 'changed';
+  }
+
+  return out;
+}
+
 interface JsonStore {
+
   rawInput: string;
   parsedJson: any;
   activeMode: 'json' | 'yaml';
@@ -47,7 +206,16 @@ interface JsonStore {
   isParsing: boolean;
   activePage: AppPage;
 
+  // Diff mode: highlight added/changed nodes vs previous successfully parsed document
+  isDiffEnabled: boolean;
+  prevParsedJson: any | null;
+  diffByPath: Record<string, 'added' | 'changed'>;
+
+  setDiffEnabled: (enabled: boolean) => void;
+
   setRawInput: (text: string, bypassWorker?: boolean) => void;
+
+
   setTheme: (theme: AppTheme) => void;
   setActiveMode: (mode: 'json' | 'yaml') => void;
   setSplitRatio: (ratio: number) => void;
@@ -75,6 +243,7 @@ interface JsonStore {
 // Instantiate worker with fallback
 let worker: Worker | null = null;
 if (typeof window !== 'undefined' && window.Worker) {
+
   try {
     worker = new Worker(new URL('../workers/json.worker.ts', import.meta.url), { type: 'module' });
   } catch (e) {
@@ -109,7 +278,10 @@ export const useJsonStore = create<JsonStore>((set, get) => {
             validationError: null,
             expandedPaths: expanded,
             isParsing: false,
+            prevParsedJson: get().parsedJson,
+            diffByPath: get().isDiffEnabled ? computeDiffByPath(get().parsedJson, data) : {},
           });
+
           get().addHistoryItem(
             get().activeMode === 'json' ? 'Parsed JSON' : 'Parsed YAML',
             get().rawInput
@@ -140,7 +312,16 @@ export const useJsonStore = create<JsonStore>((set, get) => {
     isParsing: false,
     activePage: 'editor',
 
+    isDiffEnabled: false,
+    prevParsedJson: null,
+    diffByPath: {},
+
+    setDiffEnabled: (enabled: boolean) => {
+      set({ isDiffEnabled: enabled });
+    },
+
     setRawInput: (text: string, bypassWorker = false) => {
+
       set({ rawInput: text });
 
       const searchQuery = get().searchQuery;
@@ -217,7 +398,10 @@ export const useJsonStore = create<JsonStore>((set, get) => {
             parsedJson: newData,
             validationError: null,
             expandedPaths: expanded,
+            prevParsedJson: oldData,
+            diffByPath: get().isDiffEnabled ? computeDiffByPath(oldData, newData) : {},
           });
+
         } else {
           set({
             validationError: parseResult.error,

@@ -1,6 +1,7 @@
 import { useRef } from 'react';
 import {
   Clipboard,
+
   ClipboardCheck,
   FileUp,
   FileDown,
@@ -11,6 +12,7 @@ import {
   Minimize2,
   ArrowUpDown,
   FileCode,
+  GitCompare,
 } from 'lucide-react';
 import { useJsonStore } from '../store/useJsonStore';
 import ThemeToggle from './ThemeToggle';
@@ -20,6 +22,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 export const Toolbar = () => {
   const {
     rawInput,
+
     setRawInput,
     activeMode,
     setActiveMode,
@@ -32,7 +35,10 @@ export const Toolbar = () => {
     exportToTypeScript,
     exportToLanguage,
     triggerBurst,
+    isDiffEnabled,
+    setDiffEnabled,
   } = useJsonStore();
+
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [copied, setCopied] = useState(false);
@@ -290,8 +296,28 @@ export const Toolbar = () => {
 
         <span className="w-px h-5 bg-slate-800 mx-1" />
 
+        {/* Diff toggle */}
+        <button
+          onClick={() => {
+            setDiffEnabled(true);
+            const { setActivePage } = useJsonStore.getState();
+            setActivePage('diff');
+          }}
+          className="relative flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg border border-indigo-500/40 bg-indigo-500/10 text-indigo-300 hover:text-indigo-100 hover:bg-indigo-500/20 shadow-[0_0_12px_rgba(99,102,241,0.15)] hover:shadow-[0_0_18px_rgba(99,102,241,0.35)] transition-all cursor-pointer focus:outline-none"
+          title="Compare two JSON/YAML inputs and view differences side-by-side"
+        >
+          <GitCompare className="w-3.5 h-3.5 text-indigo-400 animate-pulse" />
+          <span>Compare JSON (Diff)</span>
+          <span className="absolute -top-2.5 -right-2.5 bg-indigo-600 text-[8px] font-bold text-white px-1.5 py-0.5 rounded-full select-none shadow shadow-indigo-900 border border-indigo-400/30 animate-bounce">
+            NEW
+          </span>
+        </button>
+
+        <span className="w-px h-5 bg-slate-800 mx-1" />
+
         {/* Tree actions */}
         <button
+
           onClick={expandAll}
           className="flex items-center gap-1 px-2 py-1.5 text-xs font-medium rounded-md hover:bg-slate-800 border border-transparent hover:border-slate-800 text-slate-400 hover:text-slate-200 transition-all cursor-pointer focus:outline-none"
           title="Expand Tree Nodes"

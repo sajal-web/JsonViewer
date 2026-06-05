@@ -32,5 +32,6 @@ export interface HistoryItem {
   data: string;
 }
 
-export type AppPage = 'editor' | 'about' | 'contact' | 'terms' | 'privacy';
+export type AppPage = 'editor' | 'about' | 'contact' | 'terms' | 'privacy' | 'diff';
+
 

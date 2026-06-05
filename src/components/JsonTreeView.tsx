@@ -10,7 +10,10 @@ export const JsonTreeView = () => {
     parsedJson,
     expandedPaths,
     togglePath,
+    diffByPath,
+    isDiffEnabled,
   } = useJsonStore();
+
 
   const containerRef = useRef<HTMLDivElement>(null);
   const [dimensions, setDimensions] = useState({ width: 0, height: 400 });
@@ -88,11 +91,13 @@ export const JsonTreeView = () => {
                   node={node}
                   style={style}
                   isSearched={false}
-                  isHighlighted={false}
+                  isHighlighted={isDiffEnabled && !!diffByPath[node.id]}
+                  diffStatus={isDiffEnabled ? diffByPath[node.id] : undefined}
                   onToggle={togglePath}
                   onCopyPath={handleCopyPath}
                   onCopyValue={handleCopyValue}
                 />
+
               );
             }}
           </VirtualList>

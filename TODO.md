@@ -1,5 +1,12 @@
-- [x] Inspect ContactPage for existing (static) send message logic
-- [x] Implement working send-message behavior targeting sajalmahata.dev@gmail.com (mailto opens user’s email client)
-- [x] Update UI/handlers to use the working mechanism
-- [x] Verify build (npm run build) and ensure TypeScript passes
+# TODO
+
+- [x] Review existing DiffPage “Differences” panel implementation.
+- [x] Update DiffPage “Differences” panel UI/UX:
+  - [x] Add searchable input for diff paths
+  - [x] Add status filter (All / Added / Changed)
+  - [x] Improve “scenario-style” explanatory header + legend
+  - [x] Enhance list item hierarchy and empty states
+  - [x] Preserve existing selection/highlight behavior
+- [ ] Run lint/build to ensure no TS/React errors.
+
 
