@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Menu, Loader2 } from 'lucide-react';
 import { useJsonStore } from '../store/useJsonStore';
 import Sidebar from './Sidebar';
@@ -30,6 +30,7 @@ export const AppLayout: React.FC = () => {
     activePage,
     setActivePage,
   } = useJsonStore();
+  const [mobileTab, setMobileTab] = useState<'editor' | 'viewer'>('editor');
 
   useEffect(() => {
     const handleHashOrSearch = () => {
@@ -245,13 +246,44 @@ export const AppLayout: React.FC = () => {
             <SearchBar />
 
             {/* Row 4: Resizable Splitted Editor/Tree Panel */}
-            <div className="flex-1 w-full overflow-hidden flex">
-              <SplitPane
-                leftPanel={<MonacoEditorPanel />}
-                rightPanel={<JsonTreeView />}
-                ratio={splitRatio}
-                onChange={handleSplitRatioChange}
-              />
+            <div className="flex-1 w-full overflow-hidden flex flex-col">
+              {/* Tab Switcher for mobile */}
+              <div className="md:hidden flex bg-slate-900 border-b border-slate-800 p-1 flex-shrink-0">
+                <button
+                  onClick={() => setMobileTab('editor')}
+                  className={`flex-1 py-1.5 text-xs font-semibold rounded-md transition-all ${
+                    mobileTab === 'editor'
+                      ? 'bg-blue-600 text-white shadow-sm'
+                      : 'text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  Editor Source
+                </button>
+                <button
+                  onClick={() => setMobileTab('viewer')}
+                  className={`flex-1 py-1.5 text-xs font-semibold rounded-md transition-all ${
+                    mobileTab === 'viewer'
+                      ? 'bg-blue-600 text-white shadow-sm'
+                      : 'text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  Visual Tree
+                </button>
+              </div>
+
+              <div className="flex-1 w-full overflow-hidden flex">
+                <div className="hidden md:flex flex-1 overflow-hidden">
+                  <SplitPane
+                    leftPanel={<MonacoEditorPanel />}
+                    rightPanel={<JsonTreeView />}
+                    ratio={splitRatio}
+                    onChange={handleSplitRatioChange}
+                  />
+                </div>
+                <div className="flex md:hidden flex-1 overflow-hidden">
+                  {mobileTab === 'editor' ? <MonacoEditorPanel /> : <JsonTreeView />}
+                </div>
+              </div>
             </div>
 
             {/* Bottom Console Panel */}

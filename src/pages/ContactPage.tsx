@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ArrowLeft, Mail, Send, CheckCircle, MessageSquare } from 'lucide-react';
 import { useJsonStore } from '../store/useJsonStore';
+import Footer from '../components/Footer';
 
 export const ContactPage: React.FC = () => {
   const { setActivePage } = useJsonStore();
@@ -28,8 +29,8 @@ export const ContactPage: React.FC = () => {
   };
 
   return (
-    <div className="flex-1 w-full overflow-y-auto bg-slate-950 dark:bg-slate-950 light:bg-slate-50 text-slate-150 p-6 md:p-12">
-      <div className="max-w-xl mx-auto space-y-8">
+    <div className="flex-1 w-full overflow-y-auto bg-slate-950 dark:bg-slate-950 light:bg-slate-50 text-slate-100 p-6 md:p-12 flex flex-col justify-between">
+      <div className="max-w-xl mx-auto space-y-8 pb-12 w-full">
         {/* Back Button */}
         <button
           onClick={() => setActivePage('editor')}
@@ -123,6 +124,7 @@ export const ContactPage: React.FC = () => {
           <span>sajalmahata.dev@gmail.com</span>
         </div>
       </div>
+      <Footer />
     </div>
   );
 };

@@ -154,9 +154,9 @@ export const Toolbar = () => {
   };
 
   return (
-    <div className="h-14 border-b border-slate-800 bg-slate-900/90 backdrop-blur px-4 flex items-center justify-between z-10 sticky top-0 flex-shrink-0 select-none">
+    <div className="h-14 border-b border-slate-800 bg-slate-900/90 backdrop-blur px-4 flex items-center justify-between gap-4 z-10 sticky top-0 flex-shrink-0 select-none overflow-x-auto md:overflow-x-visible whitespace-nowrap scrollbar-none">
       {/* File Actions Group */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 flex-shrink-0">
         <button
           onClick={handlePaste}
           className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md bg-slate-850 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-slate-100 transition-all cursor-pointer focus:outline-none"
@@ -210,7 +210,7 @@ export const Toolbar = () => {
       </div>
 
       {/* Editor & Tree Operations Group */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 flex-shrink-0">
         {/* JSON / YAML Mode switcher */}
         <div className="flex bg-slate-950/80 p-0.5 rounded-lg border border-slate-800">
           <button

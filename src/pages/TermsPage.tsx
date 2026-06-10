@@ -1,13 +1,14 @@
 import React from 'react';
 import { ArrowLeft, Scale, ShieldCheck, CheckCircle } from 'lucide-react';
 import { useJsonStore } from '../store/useJsonStore';
+import Footer from '../components/Footer';
 
 export const TermsPage: React.FC = () => {
   const { setActivePage } = useJsonStore();
 
   return (
-    <div className="flex-1 w-full overflow-y-auto bg-slate-950 dark:bg-slate-950 light:bg-slate-50 text-slate-150 p-6 md:p-12">
-      <div className="max-w-3xl mx-auto space-y-8">
+    <div className="flex-1 w-full overflow-y-auto bg-slate-950 dark:bg-slate-950 light:bg-slate-50 text-slate-100 p-6 md:p-12 flex flex-col justify-between">
+      <div className="max-w-3xl mx-auto space-y-8 pb-12">
         {/* Back Button */}
         <button
           onClick={() => setActivePage('editor')}
@@ -27,19 +28,19 @@ export const TermsPage: React.FC = () => {
             Terms of Service
           </h1>
           <p className="text-xs text-slate-500">
-            Last Updated: June 2, 2026
+            Last Updated: June 10, 2026
           </p>
         </div>
 
         {/* Contents */}
-        <div className="bg-slate-900/40 dark:bg-slate-900/40 light:bg-white border border-slate-900 light:border-slate-200 rounded-xl p-6 md:p-8 space-y-6 text-xs md:text-sm text-slate-350 light:text-slate-650 leading-relaxed font-sans">
+        <div className="bg-slate-900/40 dark:bg-slate-900/40 light:bg-white border border-slate-900 light:border-slate-200 rounded-xl p-6 md:p-8 space-y-6 text-xs md:text-sm text-slate-300 light:text-slate-650 leading-relaxed font-sans">
           <section className="space-y-2">
             <h2 className="text-sm md:text-base font-bold text-slate-200 light:text-slate-850 flex items-center gap-2">
               <CheckCircle className="w-4 h-4 text-blue-500 flex-shrink-0" />
               1. Acceptance of Terms
             </h2>
             <p>
-              By accessing and using this web-based JSON/YAML Viewer application ("the Service"), you agree to comply with and be bound by these Terms of Service. If you do not agree to these terms, please do not use the Service.
+              By accessing, browsing, and using this web-based JSON/YAML Viewer application ("the Service"), you agree to comply with and be bound by these Terms of Service. If you do not agree to these terms, please do not use the Service.
             </p>
           </section>
 
@@ -72,8 +73,19 @@ export const TermsPage: React.FC = () => {
               Because this product functions entirely inside the frontend context of the client browser sandbox, users retain complete security and intellectual property over all inputs pasted or loaded. You are solely responsible for ensuring the compliance of your data inputs with your local business agreements.
             </p>
           </section>
+
+          <section className="space-y-2">
+            <h2 className="text-sm md:text-base font-bold text-slate-200 light:text-slate-850 flex items-center gap-2">
+              <CheckCircle className="w-4 h-4 text-blue-500 flex-shrink-0" />
+              5. Modification of Terms
+            </h2>
+            <p>
+              We reserve the right to revise or update these Terms of Service at any time. Your continued use of the website following the posting of any updates constitutes acceptance of the new terms.
+            </p>
+          </section>
         </div>
       </div>
+      <Footer />
     </div>
   );
 };

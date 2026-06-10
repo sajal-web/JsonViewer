@@ -15,7 +15,8 @@ import {
   Copy,
   ChevronRight,
   PlusCircle,
-  Edit3
+  Edit3,
+  X
 } from 'lucide-react';
 import { DiffEditor } from '@monaco-editor/react';
 
@@ -268,8 +269,15 @@ export const DiffPage: React.FC = () => {
   const [leftText, setLeftText] = useState<string>('');
   const [rightText, setRightText] = useState<string>('');
 
-  const [isSplitView, setIsSplitView] = useState<boolean>(true);
-  const [showSidebar, setShowSidebar] = useState<boolean>(true);
+  const [isMobile, setIsMobile] = useState<boolean>(
+    typeof window !== 'undefined' ? window.innerWidth < 768 : false
+  );
+  const [isSplitView, setIsSplitView] = useState<boolean>(
+    typeof window !== 'undefined' ? window.innerWidth >= 768 : true
+  );
+  const [showSidebar, setShowSidebar] = useState<boolean>(
+    typeof window !== 'undefined' ? window.innerWidth >= 768 : false
+  );
   const [selectedDiffPath, setSelectedDiffPath] = useState<string | null>(null);
 
   const [diffQuery, setDiffQuery] = useState('');
@@ -277,6 +285,21 @@ export const DiffPage: React.FC = () => {
   const [copiedPath, setCopiedPath] = useState<string | null>(null);
 
   const diffEditorRef = useRef<any>(null);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const handleResize = () => {
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
+      if (mobile) {
+        setIsSplitView(false);
+      }
+    };
+    // Initialize
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const leftInput = leftText.trim() ? leftText : PLACEHOLDER_LEFT;
   const rightInput = rightText.trim() ? rightText : PLACEHOLDER_RIGHT;
@@ -575,8 +598,8 @@ export const DiffPage: React.FC = () => {
   return (
     <div className="flex-1 w-full flex flex-col bg-slate-950 dark:bg-slate-950 light:bg-slate-50 text-slate-100 overflow-hidden">
       {/* Top Controls bar */}
-      <div className="h-14 border-b border-slate-900 bg-slate-950/80 backdrop-blur-md px-4 flex items-center justify-between flex-shrink-0 z-10 select-none">
-        <div className="flex items-center gap-3">
+      <div className="h-14 border-b border-slate-900 bg-slate-950/80 backdrop-blur-md px-4 flex items-center justify-between gap-4 flex-shrink-0 z-10 select-none overflow-x-auto md:overflow-x-visible whitespace-nowrap scrollbar-none">
+        <div className="flex items-center gap-3 flex-shrink-0">
           <button
             onClick={() => setActivePage('editor')}
             className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-slate-800 bg-slate-900/60 text-slate-400 hover:text-slate-200 text-xs font-semibold cursor-pointer transition-all hover:bg-slate-800/80 focus:outline-none"
@@ -618,7 +641,7 @@ export const DiffPage: React.FC = () => {
         </div>
 
         {/* Action Controls */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-shrink-0">
           {/* Load Sample Button */}
           <button
             onClick={handleLoadSample}
@@ -756,12 +779,22 @@ export const DiffPage: React.FC = () => {
 
         {/* Differences list panel */}
         {showSidebar && (
-          <div className="w-[380px] shrink-0 border-l border-slate-900 bg-slate-950 flex flex-col z-10">
+          <div className="w-full md:w-[380px] shrink-0 border-l border-slate-900 bg-slate-950 flex flex-col z-20 absolute md:relative inset-y-0 right-0 shadow-2xl">
             <div className="h-10 flex items-center justify-between px-4 border-b border-slate-900 text-xs font-mono text-slate-400 select-none">
               <span className="font-semibold text-slate-200">CHANGED PATHS</span>
-              <span className="text-[10px] text-slate-500 font-bold bg-slate-900 px-2 py-0.5 rounded-full">
-                {diffList.length} total
-              </span>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] text-slate-500 font-bold bg-slate-900 px-2 py-0.5 rounded-full">
+                  {diffList.length} total
+                </span>
+                {isMobile && (
+                  <button
+                    onClick={() => setShowSidebar(false)}
+                    className="p-1 rounded hover:bg-slate-900 text-slate-400 hover:text-slate-200 cursor-pointer"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
             </div>
 
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
