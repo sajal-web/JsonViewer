@@ -120,7 +120,7 @@ export const ContactPage: React.FC = () => {
             <MessageSquare className="w-3 h-3" />
             Average response rate &lt; 24h
           </span>
-          <span>sajalmahata.dee@gmail.com</span>
+          <span>sajalmahata.dev@gmail.com</span>
         </div>
       </div>
     </div>
