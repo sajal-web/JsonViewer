@@ -297,11 +297,11 @@ export const useJsonStore = create<JsonStore>((set, get) => {
   }
 
   return {
-    rawInput: JSON.stringify(DEFAULT_JSON_MOCK, null, 2),
-    parsedJson: DEFAULT_JSON_MOCK,
+    rawInput: '',
+    parsedJson: null,
     activeMode: 'json',
     theme: 'dark',
-    expandedPaths: new Set<string>(['$', '$.performance', '$.settings', '$.metadata']),
+    expandedPaths: new Set<string>(['$']),
     searchQuery: '',
     searchResults: [],
     searchIndex: -1,

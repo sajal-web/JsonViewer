@@ -598,7 +598,7 @@ export const DiffPage: React.FC = () => {
   return (
     <div className="flex-1 w-full flex flex-col bg-slate-950 dark:bg-slate-950 light:bg-slate-50 text-slate-100 overflow-hidden">
       {/* Top Controls bar */}
-      <div className="h-14 border-b border-slate-900 bg-slate-950/80 backdrop-blur-md px-4 flex items-center justify-between gap-4 flex-shrink-0 z-10 select-none overflow-x-auto md:overflow-x-visible whitespace-nowrap scrollbar-none">
+      <div className="h-14 border-b border-slate-900 bg-slate-950/80 backdrop-blur-md px-4 flex items-center justify-between gap-4 flex-shrink-0 z-10 select-none overflow-x-auto whitespace-nowrap scrollbar-none">
         <div className="flex items-center gap-3 flex-shrink-0">
           <button
             onClick={() => setActivePage('editor')}

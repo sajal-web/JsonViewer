@@ -16,6 +16,7 @@ import PrivacyPage from '../pages/PrivacyPage';
 import { DiffPage } from '../pages/DiffPage';
 
 
+import TicketMakerPage from '../pages/TicketMakerPage';
 import ParticleOverlay from './ParticleOverlay';
 import CursorTrail from './CursorTrail';
 
@@ -48,6 +49,8 @@ export const AppLayout: React.FC = () => {
         hash === '#/diff'
       ) {
         setActivePage('diff');
+      } else if (pageParam === 'ticket-maker' || hash === '#ticket-maker' || path === '/ticket-maker') {
+        setActivePage('ticket-maker');
       } else if (pageParam === 'about' || hash === '#about' || path === '/about') {
         setActivePage('about');
       } else if (pageParam === 'contact' || hash === '#contact' || path === '/contact') {
@@ -92,6 +95,9 @@ export const AppLayout: React.FC = () => {
     if (activePage === 'diff') {
       title = 'JSON Diff Checker - Compare JSON Files Online | JSON Viewer';
       description = 'Compare two JSON files side-by-side online. Spot additions, modifications, and deletions instantly with code syntax highlighting and automated JSON path diff parsing.';
+    } else if (activePage === 'ticket-maker') {
+      title = 'Ticket Maker - Generate Issue JSON';
+      description = 'Generate a ticket or issue JSON payload using our fast Ticket Maker tool.';
     } else if (activePage === 'about') {
       title = 'About Us - JSON Viewer';
       description = 'Learn more about JSON Viewer, a developer-friendly tool to format, validate, and convert JSON/YAML.';
@@ -171,6 +177,8 @@ export const AppLayout: React.FC = () => {
         return <PrivacyPage />;
       case 'diff':
         return <DiffPage />;
+      case 'ticket-maker':
+        return <TicketMakerPage />;
       default:
         return null;
 
@@ -178,12 +186,12 @@ export const AppLayout: React.FC = () => {
   };
 
   return (
-    <div className="w-screen h-screen flex flex-col bg-slate-950 dark:bg-slate-950 light:bg-slate-50 text-slate-100 overflow-hidden relative">
+    <div className="w-screen h-screen flex flex-col bg-slate-950 dark:bg-slate-950 light:bg-slate-50 text-slate-100 light:text-slate-900 overflow-hidden relative">
       {/* Drawer Sidebar */}
       <Sidebar />
 
       {/* Main Top Header Branding */}
-      <header className="h-12 border-b border-slate-900 bg-slate-950/80 backdrop-blur-md px-4 flex items-center justify-between flex-shrink-0 z-30 select-none">
+      <header className="h-12 border-b border-slate-900 light:border-slate-200 bg-slate-950/80 light:bg-white/80 backdrop-blur-md px-4 flex items-center justify-between flex-shrink-0 z-30 select-none">
         <div className="flex items-center gap-3">
           <button
             onClick={toggleSidebar}

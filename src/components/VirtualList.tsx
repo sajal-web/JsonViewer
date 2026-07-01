@@ -49,8 +49,9 @@ export const VirtualList = ({
           position: 'absolute',
           top: `${i * itemSize}px`,
           left: 0,
-          right: 0,
           height: `${itemSize}px`,
+          minWidth: '100%',
+          width: 'max-content',
         },
       })
     );
@@ -63,13 +64,13 @@ export const VirtualList = ({
       className="scrollbar-thin"
       style={{
         overflowY: 'auto',
-        overflowX: 'hidden',
+        overflowX: 'auto',
         height: `${height}px`,
         width: typeof width === 'number' ? `${width}px` : width,
         position: 'relative',
       }}
     >
-      <div style={{ height: `${itemCount * itemSize}px`, width: '100%', position: 'relative' }}>
+      <div style={{ height: `${itemCount * itemSize}px`, minWidth: '100%', width: 'max-content', position: 'relative' }}>
         {items}
       </div>
     </div>

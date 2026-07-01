@@ -154,12 +154,12 @@ export const Toolbar = () => {
   };
 
   return (
-    <div className="h-14 border-b border-slate-800 bg-slate-900/90 backdrop-blur px-4 flex items-center justify-between gap-4 z-10 sticky top-0 flex-shrink-0 select-none overflow-x-auto md:overflow-x-visible whitespace-nowrap scrollbar-none">
+    <div className="h-14 border-b border-slate-800 light:border-slate-200 bg-slate-900/90 light:bg-white/90 backdrop-blur px-4 flex items-center justify-between gap-4 z-10 sticky top-0 flex-shrink-0 select-none overflow-x-auto whitespace-nowrap scrollbar-none">
       {/* File Actions Group */}
       <div className="flex items-center gap-2 flex-shrink-0">
         <button
           onClick={handlePaste}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md bg-slate-850 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-slate-100 transition-all cursor-pointer focus:outline-none"
+          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md bg-slate-850 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-slate-100 light:bg-white light:hover:bg-slate-100 light:border-slate-200 light:text-slate-600 light:hover:text-slate-900 transition-all cursor-pointer focus:outline-none"
           title="Paste from clipboard"
         >
           <Clipboard className="w-3.5 h-3.5" />
@@ -168,18 +168,18 @@ export const Toolbar = () => {
 
         <button
           onClick={(e) => handleCopy(e.clientX, e.clientY)}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md bg-slate-850 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-slate-100 transition-all cursor-pointer focus:outline-none"
+          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md bg-slate-850 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-slate-100 light:bg-white light:hover:bg-slate-100 light:border-slate-200 light:text-slate-600 light:hover:text-slate-900 transition-all cursor-pointer focus:outline-none"
           title="Copy contents"
         >
           {copied ? <ClipboardCheck className="w-3.5 h-3.5 text-emerald-500" /> : <Clipboard className="w-3.5 h-3.5" />}
           <span>{copied ? 'Copied' : 'Copy'}</span>
         </button>
 
-        <span className="w-px h-5 bg-slate-800 mx-1" />
+        <span className="w-px h-5 bg-slate-800 light:bg-slate-200 mx-1" />
 
         <button
           onClick={() => fileInputRef.current?.click()}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md bg-slate-850 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-slate-100 transition-all cursor-pointer focus:outline-none"
+          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md bg-slate-850 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-slate-100 light:bg-white light:hover:bg-slate-100 light:border-slate-200 light:text-slate-600 light:hover:text-slate-900 transition-all cursor-pointer focus:outline-none"
           title="Upload JSON/YAML/TXT file"
           id="upload-btn"
         >
@@ -198,7 +198,7 @@ export const Toolbar = () => {
         <button
           onClick={handleDownload}
           disabled={!rawInput.trim()}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md bg-slate-850 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-slate-100 disabled:opacity-40 disabled:pointer-events-none transition-all cursor-pointer focus:outline-none"
+          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md bg-slate-850 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-slate-100 light:bg-white light:hover:bg-slate-100 light:border-slate-200 light:text-slate-600 light:hover:text-slate-900 disabled:opacity-40 disabled:pointer-events-none transition-all cursor-pointer focus:outline-none"
           title="Download current content"
           id="download-btn"
         >
@@ -235,12 +235,12 @@ export const Toolbar = () => {
           </button>
         </div>
 
-        <span className="w-px h-5 bg-slate-800 mx-1" />
+        <span className="w-px h-5 bg-slate-800 light:bg-slate-200 mx-1" />
 
         {/* Format / Minify Actions */}
         <button
           onClick={handleFormatClick}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md bg-slate-850 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-slate-100 transition-all cursor-pointer focus:outline-none"
+          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md bg-slate-850 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-slate-100 light:bg-white light:hover:bg-slate-100 light:border-slate-200 light:text-slate-600 light:hover:text-slate-900 transition-all cursor-pointer focus:outline-none"
           title="Format (Pretty Print) (Cmd+Shift+F)"
           id="format-btn"
         >
@@ -250,7 +250,7 @@ export const Toolbar = () => {
 
         <button
           onClick={handleMinifyClick}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md bg-slate-850 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-slate-100 transition-all cursor-pointer focus:outline-none"
+          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md bg-slate-850 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-slate-100 light:bg-white light:hover:bg-slate-100 light:border-slate-200 light:text-slate-600 light:hover:text-slate-900 transition-all cursor-pointer focus:outline-none"
           title="Minify JSON (collapses spaces)"
           id="minify-btn"
         >
@@ -261,7 +261,7 @@ export const Toolbar = () => {
         <button
           onClick={handleSortKeys}
           disabled={!rawInput.trim()}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md bg-slate-850 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-slate-100 disabled:opacity-40 disabled:pointer-events-none transition-all cursor-pointer focus:outline-none"
+          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md bg-slate-850 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-slate-100 light:bg-white light:hover:bg-slate-100 light:border-slate-200 light:text-slate-600 light:hover:text-slate-900 disabled:opacity-40 disabled:pointer-events-none transition-all cursor-pointer focus:outline-none"
           title="Sort keys alphabetically"
         >
           <ArrowUpDown className="w-3.5 h-3.5" />
@@ -293,7 +293,7 @@ export const Toolbar = () => {
           </button>
         </div>
 
-        <span className="w-px h-5 bg-slate-800 mx-1" />
+        <span className="w-px h-5 bg-slate-800 light:bg-slate-200 mx-1" />
 
         {/* Diff toggle */}
         <button
@@ -312,7 +312,7 @@ export const Toolbar = () => {
           </span>
         </button>
 
-        <span className="w-px h-5 bg-slate-800 mx-1" />
+        <span className="w-px h-5 bg-slate-800 light:bg-slate-200 mx-1" />
 
         {/* Tree actions */}
         <button
@@ -332,7 +332,7 @@ export const Toolbar = () => {
           <ChevronsUp className="w-3.5 h-3.5" />
         </button>
 
-        <span className="w-px h-5 bg-slate-800 mx-1" />
+        <span className="w-px h-5 bg-slate-800 light:bg-slate-200 mx-1" />
 
         {/* Theme & Reset */}
         <ThemeToggle />

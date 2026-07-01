@@ -190,11 +190,29 @@ export const Sidebar = () => {
               <div className="space-y-3">
                 <div className="flex items-center gap-2 text-slate-400 font-semibold text-xs uppercase tracking-wider">
                   <FileText className="w-4 h-4 text-sky-400" />
-                  <span>Platform Info</span>
+                  <span>Tools & Pages</span>
                 </div>
                 <div className="grid grid-cols-2 gap-2 text-xs">
                   <button
-                    onClick={() => setActivePage('about')}
+                    onClick={() => {
+                      setActivePage('ticket-maker');
+                      toggleSidebar();
+                    }}
+                    className={`flex items-center gap-2 p-2.5 rounded-lg border text-left cursor-pointer transition-all ${
+                      activePage === 'ticket-maker'
+                        ? 'bg-blue-500/10 border-blue-500/35 text-blue-400 font-semibold'
+                        : 'bg-slate-900/40 border-slate-900 hover:border-slate-800 text-slate-400 hover:text-slate-200'
+                    }`}
+                  >
+                    <FileCode2 className="w-3.5 h-3.5 flex-shrink-0 text-emerald-400" />
+                    <span>Ticket Maker</span>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setActivePage('about');
+                      toggleSidebar();
+                    }}
                     className={`flex items-center gap-2 p-2.5 rounded-lg border text-left cursor-pointer transition-all ${
                       activePage === 'about'
                         ? 'bg-blue-500/10 border-blue-500/35 text-blue-400 font-semibold'
@@ -206,7 +224,10 @@ export const Sidebar = () => {
                   </button>
 
                   <button
-                    onClick={() => setActivePage('contact')}
+                    onClick={() => {
+                      setActivePage('contact');
+                      toggleSidebar();
+                    }}
                     className={`flex items-center gap-2 p-2.5 rounded-lg border text-left cursor-pointer transition-all ${
                       activePage === 'contact'
                         ? 'bg-blue-500/10 border-blue-500/35 text-blue-400 font-semibold'
@@ -218,7 +239,10 @@ export const Sidebar = () => {
                   </button>
 
                   <button
-                    onClick={() => setActivePage('terms')}
+                    onClick={() => {
+                      setActivePage('terms');
+                      toggleSidebar();
+                    }}
                     className={`flex items-center gap-2 p-2.5 rounded-lg border text-left cursor-pointer transition-all ${
                       activePage === 'terms'
                         ? 'bg-blue-500/10 border-blue-500/35 text-blue-400 font-semibold'
@@ -230,7 +254,10 @@ export const Sidebar = () => {
                   </button>
 
                   <button
-                    onClick={() => setActivePage('privacy')}
+                    onClick={() => {
+                      setActivePage('privacy');
+                      toggleSidebar();
+                    }}
                     className={`flex items-center gap-2 p-2.5 rounded-lg border text-left cursor-pointer transition-all ${
                       activePage === 'privacy'
                         ? 'bg-blue-500/10 border-blue-500/35 text-blue-400 font-semibold'

@@ -127,7 +127,7 @@ export const JsonNode = memo(({
       ) : null}
 
       {/* Node Value or Node structure */}
-      <div className="truncate flex-1 min-w-0 mr-4">
+      <div className="flex-1 mr-4 whitespace-nowrap">
         {renderValue()}
       </div>
 
