@@ -3,7 +3,7 @@ import type { ValidationError, AppTheme, HistoryItem, SearchMatch, AppPage } fro
 import { parseJsonWithErrorInfo, parseYamlWithErrorInfo, jsonToYaml, yamlToJson, sortJson, jsonToTypeScript, jsonToLanguage } from '../utils/jsonParser';
 import type { CodeLanguage } from '../utils/jsonParser';
 
-import { DEFAULT_JSON_MOCK } from '../constants';
+
 
 function escapeRegExp(query: string) {
   return query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
